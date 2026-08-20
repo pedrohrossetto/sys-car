@@ -1,17 +1,19 @@
-
 # Sistema de Cadastro Ambiental Rural (sys-car)
+
 ## Detalhes
+
 - Instituição:
-  - Instituto Federal Sul-Riograndense de Passo Fundo 
+  - Instituto Federal Sul-Riograndense de Passo Fundo
 - Disciplina:
-  - Linguagem Orientada a Objetos - 4° Semestre
+  - Linguagem de Programação Orientada a Objetos - 4° Semestre
 - Docente:
   - Leonardo Deliyannis Constantin
 
 ## Descrição
+
 - Proprietários poderão registrar suas propriedades rurais, declarando os limites das propriedades sobre um mapa interativo.
-- Poderão requisitar declarações de conformidade ambiental, onde será buscado em uma base de alertas de desmatamento se há algum alerta, se não houver, será emitido. 
-- As propriedades registradas poderão ser embargadas por autoridades competentes se for comprovado desmatamento ilegal 
+- Poderão requisitar declarações de conformidade ambiental, onde será buscado em uma base de alertas de desmatamento se há algum alerta, se não houver, será emitido.
+- As propriedades registradas poderão ser embargadas por autoridades competentes se for comprovado desmatamento ilegal
 
 ## Integrantes:
 
@@ -27,7 +29,6 @@
 - Eduardo Milani
   - Desenvolvedor
   - @EduardoMilani8
-
 
 ## Diagrama do Modelo Conceitual
 
@@ -120,7 +121,7 @@ direction TB
     REGISTRO_DESMATAMENTO "1" *-- "0..*" EVIDENCIA : contem
     REGISTRO_DESMATAMENTO "1" --> "0..*" NOTIFICACAO : gera
     REGISTRO_DESMATAMENTO ..> STATUS_ALERTA : utiliza
-    
+
     NOTIFICACAO "*" --> "1" UNIDADE_COMPETENTE : destinada
     UNIDADE_COMPETENTE "0..*" --> "0..*" PROPRIEDADE_RURAL : embarga
 
