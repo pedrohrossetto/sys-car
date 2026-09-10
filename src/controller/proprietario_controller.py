@@ -2,6 +2,10 @@ from model.proprietario import Proprietario
 
 
 class ProprietarioController:
+    # Padrão de retorno dos métodos de escrita:
+    # (resultado, erro) -> se deu certo: (objeto/True, None).
+    #                       se deu errado: (None, "mensagem de erro").
+    # Isso permite à view exibir o erro sem precisar de try/except.
     def criar(self, nome, cpf, cnpj=None):
         if not nome or not cpf:
             return None, "Nome e CPF são obrigatórios."
@@ -10,9 +14,6 @@ class ProprietarioController:
         proprietario = Proprietario(nome, cpf, cnpj)
         proprietario.salvar()
         return proprietario, None
-
-    def listar(self):
-        return Proprietario.listar_todos()
 
     def buscar_por_id(self, id):
         return Proprietario.buscar_por_id(id)

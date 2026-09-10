@@ -4,18 +4,18 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from database.database import init_db
-from view.proprietario_view import ProprietarioView
 
 
 def main():
     init_db()
-    print("=== SYS-CAR ===")
-    print("1. CRUD Proprietário")
-    opcao = input("Escolha uma opção: ").strip()
-    if opcao == "1":
-        ProprietarioView().exibir_menu()
+    from view.app_tk import HAS_TK
+    if HAS_TK:
+        from view.app_tk import main as main_tk
+        main_tk()
     else:
-        print("Opção inválida.")
+        print("Tkinter não disponível neste ambiente. Usando o modo console...")
+        from view.menu_console import main as main_console
+        main_console()
 
 
 if __name__ == "__main__":

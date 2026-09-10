@@ -139,21 +139,26 @@ sys-car/
 ├── data/                         # (criada automaticamente) banco SQLite
 │   └── syscar.db                 # arquivo do banco gerado em tempo de execução
 └── src/
-    ├── main.py                   # ponto de entrada do programa (menu principal)
+    ├── main.py                   # ponto de entrada (abre a interface Tkinter)
     ├── database/
     │   └── database.py           # conexão + criação das tabelas (init_db)
     ├── model/                    # classes POO + operações SQL de cada entidade
-    │   ├── proprietario.py       # CRUD do PROPRIETARIO (INSERT/UPDATE/DELETE/SELECT)
-    │   └── ...                   # (novas entidades aqui)
+    │   ├── proprietario.py       # CRUD do PROPRIETARIO
+    │   ├── propriedade_rural.py  # CRUD do PROPRIEDADE_RURAL (FK p/ proprietario)
+    │   └── localizacao.py        # CRUD do LOCALIZACAO (FK p/ propriedade rural)
     ├── controller/               # regras de negócio e validações
     │   ├── proprietario_controller.py
-    │   └── ...                   # (novos controllers aqui)
-    └── view/                     # interfaces com o usuário (console)
-        ├── proprietario_view.py  # menu CRUD do PROPRIETARIO
-        └── ...                   # (novas views aqui)
+    │   ├── propriedade_rural_controller.py
+    │   └── localizacao_controller.py
+    └── view/
+        ├── app_tk.py             # interface gráfica Tkinter (janela única)
+        ├── menu_console.py       # menu principal do modo console (fallback)
+        ├── proprietario_view.py  # menu CRUD do PROPRIETARIO (console)
+        ├── propriedade_rural_view.py  # menu CRUD do PROPRIEDADE_RURAL (console)
+        └── localizacao_view.py   # menu CRUD do LOCALIZACAO (console)
 ```
 
-### Como executar
+### Executar
 
 ```bash
 python3 src/main.py
@@ -161,7 +166,9 @@ python3 src/main.py
 
 Na primeira execução, o programa cria automaticamente a pasta `data/` e o banco `data/syscar.db`. Se apagar o arquivo do banco, ele será recriado do zero (vazio) na próxima execução.
 
-### Onde fica cada coisa (guia para novos participantes)
+O programa tenta abrir a **interface gráfica (Tkinter)**. Se o Tkinter não estiver disponível no ambiente, ele cai automaticamente para o **modo console** (menus numerados no terminal).
+
+### Onde fica cada coisa
 
 | O que você precisa fazer | Onde |
 | --- | --- |
@@ -182,5 +189,32 @@ Para cada nova entidade, siga esta ordem dentro de `src`:
 4. **view/** → criar o menu console
 5. **main.py** → registrar a nova opção no menu principal
 
-> Dica: o `main.py` ajusta o `sys.path` automaticamente, então novos módulos devem ser importados com caminhos relativos à pasta `src` (ex: `from model.proprietario import Proprietario`).
 
+---
+
+## Plano
+
+### Entidades a implementar (ordem de dependência)
+
+| # | Entidade | Campos | Relacionamento | Status |
+|---| --- | --- | --- | --- |
+| 1 | **PROPRIETARIO** | id, nome, cpf, cnpj | — | Implementado |
+| 2 | **PROPRIEDADE_RURAL** | id, nome, cadastro_publico, proprietario_id (FK) | 1 proprietário → N propriedades | Implementado |
+| 3 | **LOCALIZACAO** | id, latitude, longitude, altitude, poligono_geometria, propriedade_id (FK) | 1 propriedade → 1 localização | Implementado |
+| 4 | SATELITE | id, nome, entidade_responsavel | — | Nao Implementado |
+| 5 | USUARIO | id, nome, cpf, email | — | Nao Implementado |
+| 6 | REGISTRO_DESMATAMENTO | id, descricao, data, status | — | Nao Implementado |
+| 7 | EVIDENCIA | id, tipo, link, data | — | Nao Implementado |
+| 8 | NOTIFICACAO | id, data, status, mensagem | — | Nao Implementado |
+| 9 | STATUS_ALERTA | enum: PENDENTE, CONFIRMADO, RESOLVIDO, CANCELADO | — | Nao Implementado |
+| 10 | UNIDADE_COMPETENTE | id, nome, tipo_unidade_orgao, contato | — | Nao Implementado |
+
+A cadeia implementada: **Proprietário → Propriedade → Localização**, com chaves estrangeiras e exclusão em cascata (apagar um proprietário apaga suas propriedades e localizações).
+
+### Interface gráfica (Tkinter) 
+
+PARA USAR VAI TER Q BAIXAR O TKINTER 
+
+Substituir os menus de console por uma interface gráfica mínima com **Tkinter** biblioteca padrao.
+
+BOTAO DE CADASTRO FUNCIONANDO CERTO, ATUALIZAR EXCLUIR AINDA EM WIP

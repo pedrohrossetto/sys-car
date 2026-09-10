@@ -9,21 +9,18 @@ class ProprietarioView:
         while True:
             print("\n=== CRUD PROPRIETÁRIO ===")
             print("1. Cadastrar")
-            print("2. Listar")
-            print("3. Buscar por ID")
-            print("4. Atualizar")
-            print("5. Excluir")
+            print("2. Buscar por ID")
+            print("3. Atualizar")
+            print("4. Excluir")
             print("0. Voltar")
             opcao = input("Escolha uma opção: ").strip()
             if opcao == "1":
                 self.cadastrar()
             elif opcao == "2":
-                self.listar()
-            elif opcao == "3":
                 self.buscar_por_id()
-            elif opcao == "4":
+            elif opcao == "3":
                 self.atualizar()
-            elif opcao == "5":
+            elif opcao == "4":
                 self.excluir()
             elif opcao == "0":
                 break
@@ -39,15 +36,6 @@ class ProprietarioView:
             print(f"Erro: {erro}")
         else:
             print(f"Proprietário cadastrado com ID {proprietario.id}.")
-
-    def listar(self):
-        proprietarios = self.controller.listar()
-        if not proprietarios:
-            print("Nenhum proprietário cadastrado.")
-            return
-        print("\n--- PROPRIETÁRIOS ---")
-        for p in proprietarios:
-            print(f"ID {p.id} | {p.nome} | CPF {p.cpf} | CNPJ {p.cnpj or '-'}")
 
     def buscar_por_id(self):
         try:
