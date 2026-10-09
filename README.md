@@ -131,6 +131,14 @@ direction TB
 
 O diagrama acima é o modelo **conceitual**. Os diagramas da implementação ficam em [`docs/`](docs/README.md).
 
+## Interface
+
+A janela principal tem uma aba para cada cadastro.
+
+![Aba Proprietários com dois cadastros na lista](docs/imagens/aba-proprietarios.png)
+
+![Aba Localizações com latitude, longitude e polígono preenchidos](docs/imagens/aba-localizacoes.png)
+
 ## Documentação
 
 Toda a documentação técnica (decisões de projeto, diagramas UML em pt-BR e EN e guias em Leitura Fácil) está em [`docs/README.md`](docs/README.md).
