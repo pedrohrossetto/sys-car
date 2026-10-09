@@ -1,6 +1,8 @@
 import sqlite3
 from pathlib import Path
 
+from descoberta import modulos_com
+
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 DB_PATH = DATA_DIR / "syscar.db"
 
@@ -19,52 +21,18 @@ def get_connection():
 
 
 def init_db():
-    """Cria as tabelas do banco, caso ainda não existam (IF NOT EXISTS).
+    """Cria as tabelas de todos os models que definem a constante SCHEMA.
 
-    A tabela 'proprietarios' é criada primeiro porque as outras duas
-    referenciam ela via FOREIGN KEY.
+    Cada módulo do pacote 'model' (inclusive subpacotes) pode declarar
+    SCHEMA com um ou mais 'CREATE TABLE IF NOT EXISTS'. Este arquivo não
+    conhece nenhuma tabela: quem cria uma entidade nova não precisa editá-lo.
     """
+    import model
+
     conn = get_connection()
-    # 'cursor' é o objeto do sqlite3 que executa comandos SQL e
-    # guarda o resultado da consulta. Ele "aponta" para as linhas
-    # retornadas, permitindo percorrê-las com fetchone()/fetchall().
-    cursor = conn.cursor()
-    cursor.execute(
-        """
-        CREATE TABLE IF NOT EXISTS proprietarios (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nome TEXT NOT NULL,
-            cpf TEXT UNIQUE NOT NULL,
-            cnpj TEXT
-        )
-        """
-    )
-    cursor.execute(
-        """
-        CREATE TABLE IF NOT EXISTS propriedades_rurais (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nome TEXT NOT NULL,
-            cadastro_publico TEXT,
-            proprietario_id INTEGER NOT NULL,
-            FOREIGN KEY (proprietario_id) REFERENCES proprietarios(id)
-                ON DELETE CASCADE
-        )
-        """
-    )
-    cursor.execute(
-        """
-        CREATE TABLE IF NOT EXISTS localizacoes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            latitude REAL,
-            longitude REAL,
-            altitude REAL,
-            poligono_geometria TEXT,
-            propriedade_id INTEGER UNIQUE NOT NULL,
-            FOREIGN KEY (propriedade_id) REFERENCES propriedades_rurais(id)
-                ON DELETE CASCADE
-        )
-        """
-    )
-    # 'commit' grava as alterações no arquivo do banco.
-    conn.commit()
-    conn.close()
+    try:
+        for modulo in modulos_com(model, "SCHEMA"):
+            conn.executescript(modulo.SCHEMA)
+        conn.commit()
+    finally:
+        conn.close()
