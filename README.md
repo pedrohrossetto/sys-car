@@ -11,7 +11,7 @@
 
 ## Descrição
 
-- Proprietários poderão registrar suas propriedades rurais, declarando os limites das propriedades sobre um mapa interativo.
+- Proprietários poderão registrar suas propriedades rurais, declarando as coordenadas e o polígono que delimita cada propriedade.
 - Poderão requisitar declarações de conformidade ambiental, onde será buscado em uma base de alertas de desmatamento se há algum alerta, se não houver, será emitido.
 - As propriedades registradas poderão ser embargadas por autoridades competentes se for comprovado desmatamento ilegal
 
@@ -129,33 +129,41 @@ direction TB
     PROPRIETARIO "1" --> "1..*" PROPRIEDADE_RURAL : possui
 ```
 
+O diagrama acima é o modelo **conceitual**. Os diagramas da implementação ficam em [`docs/`](docs/README.md).
+
+## Documentação
+
+Toda a documentação técnica (decisões de projeto, diagramas UML em pt-BR e EN e guias em Leitura Fácil) está em [`docs/README.md`](docs/README.md).
+
 ## Estrutura do Projeto
 
-O projeto segue o padrão **MVC (Model-View-Controller)** com banco de dados **SQLite**.
+O projeto segue o padrão **MVC (Model-View-Controller)** com banco de dados **SQLite** e interface **Tkinter**.
 
 ```
 sys-car/
 ├── README.md
+├── docs/                         # documentação (ADRs, UML, guias)
 ├── data/                         # (criada automaticamente) banco SQLite
-│   └── syscar.db                 # arquivo do banco gerado em tempo de execução
+│   └── syscar.db
+├── tests/                        # testes automatizados (unittest)
 └── src/
-    ├── main.py                   # ponto de entrada (abre a interface Tkinter)
+    ├── main.py                   # ponto de entrada
+    ├── descoberta.py             # descoberta automática de tabelas e abas
     ├── database/
-    │   └── database.py           # conexão + criação das tabelas (init_db)
-    ├── model/                    # classes POO + operações SQL de cada entidade
-    │   ├── proprietario.py       # CRUD do PROPRIETARIO
-    │   ├── propriedade_rural.py  # CRUD do PROPRIEDADE_RURAL (FK p/ proprietario)
-    │   └── localizacao.py        # CRUD do LOCALIZACAO (FK p/ propriedade rural)
+    │   └── database.py           # conexão + init_db() (executa o SCHEMA de cada model)
+    ├── model/                    # classes de domínio; cada uma declara seu SCHEMA
+    │   ├── base.py               # ModeloBase (Template Method)
+    │   ├── documento.py          # validadores de CPF/CNPJ (Strategy)
+    │   ├── coordenadas.py        # validação de latitude, longitude e polígono
+    │   ├── proprietario.py
+    │   ├── propriedade_rural.py
+    │   └── localizacao.py
     ├── controller/               # regras de negócio e validações
-    │   ├── proprietario_controller.py
-    │   ├── propriedade_rural_controller.py
-    │   └── localizacao_controller.py
     └── view/
-        ├── app_tk.py             # interface gráfica Tkinter (janela única)
-        ├── menu_console.py       # menu principal do modo console (fallback)
-        ├── proprietario_view.py  # menu CRUD do PROPRIETARIO (console)
-        ├── propriedade_rural_view.py  # menu CRUD do PROPRIEDADE_RURAL (console)
-        └── localizacao_view.py   # menu CRUD do LOCALIZACAO (console)
+        ├── janela_principal.py   # janela, menu e descoberta das abas
+        ├── aba_crud.py           # AbaCrud (Template Method)
+        ├── widgets.py            # Seletor e tabela com rolagem
+        └── *_aba.py              # uma aba por entidade
 ```
 
 ### Executar
@@ -164,57 +172,28 @@ sys-car/
 python3 src/main.py
 ```
 
-Na primeira execução, o programa cria automaticamente a pasta `data/` e o banco `data/syscar.db`. Se apagar o arquivo do banco, ele será recriado do zero (vazio) na próxima execução.
+O programa precisa do **Tkinter**:
 
-O programa tenta abrir a **interface gráfica (Tkinter)**. Se o Tkinter não estiver disponível no ambiente, ele cai automaticamente para o **modo console** (menus numerados no terminal).
+- Linux (Debian/Ubuntu): `sudo apt install python3-tk`
+- Windows e macOS: o instalador oficial do Python (python.org) já inclui o Tkinter.
 
-### Onde fica cada coisa
+Na primeira execução, o programa cria a pasta `data/` e o banco `data/syscar.db`.
 
-| O que você precisa fazer | Onde |
-| --- | --- |
-| Conectar/criar o banco | `src/database/database.py` |
-| **Criar uma tabela nova** | adicionar um `CREATE TABLE IF NOT EXISTS` dentro do `init_db()`, em `src/database/database.py` |
-| **Queries de cada CRUD** (INSERT, UPDATE, DELETE, SELECT) | no respectivo arquivo em `src/model/` (ex: `proprietario.py`) |
-| Regras de negócio e validações (ex: CPF duplicado) | no respectivo arquivo em `src/controller/` |
-| Menus e telas para o usuário | no respectivo arquivo em `src/view/` |
-| Expor o menu no programa | registrar no `src/main.py` |
+> **Banco de uma versão antiga:** se o programa avisar que o banco é de uma versão antiga, apague o arquivo `data/syscar.db` e rode de novo.
 
-### Padrão para adicionar um novo CRUD
+### Testes
 
-Para cada nova entidade, siga esta ordem dentro de `src`:
+```bash
+python3 -m unittest discover -s tests -v
+```
 
-1. **model/** → criar a classe POO + as operações SQL (INSERT/UPDATE/DELETE/SELECT)
-2. **database/** → adicionar o `CREATE TABLE` da entidade no `init_db()`
-3. **controller/** → validar as regras de negócio
-4. **view/** → criar o menu console
-5. **main.py** → registrar a nova opção no menu principal
+### Como adicionar uma entidade nova
 
+Nenhum arquivo central precisa ser editado:
 
----
+1. **model/**: crie a classe e declare a constante `SCHEMA` com o `CREATE TABLE IF NOT EXISTS`. O `init_db()` encontra sozinho.
+2. **controller/**: crie o controller com as regras. Os métodos de escrita devolvem `(resultado, erro)`.
+3. **view/**: crie o módulo da aba com `ORDEM` e `registrar_abas(notebook)`. A janela principal encontra sozinha.
+4. **tests/**: crie os testes da entidade.
 
-## Plano
-
-### Entidades a implementar (ordem de dependência)
-
-| # | Entidade | Campos | Relacionamento | Status |
-|---| --- | --- | --- | --- |
-| 1 | **PROPRIETARIO** | id, nome, cpf, cnpj | — | Implementado |
-| 2 | **PROPRIEDADE_RURAL** | id, nome, cadastro_publico, proprietario_id (FK) | 1 proprietário → N propriedades | Implementado |
-| 3 | **LOCALIZACAO** | id, latitude, longitude, altitude, poligono_geometria, propriedade_id (FK) | 1 propriedade → 1 localização | Implementado |
-| 4 | SATELITE | id, nome, entidade_responsavel | — | Nao Implementado |
-| 5 | USUARIO | id, nome, cpf, email | — | Nao Implementado |
-| 6 | REGISTRO_DESMATAMENTO | id, descricao, data, status | — | Nao Implementado |
-| 7 | EVIDENCIA | id, tipo, link, data | — | Nao Implementado |
-| 8 | NOTIFICACAO | id, data, status, mensagem | — | Nao Implementado |
-| 9 | STATUS_ALERTA | enum: PENDENTE, CONFIRMADO, RESOLVIDO, CANCELADO | — | Nao Implementado |
-| 10 | UNIDADE_COMPETENTE | id, nome, tipo_unidade_orgao, contato | — | Nao Implementado |
-
-A cadeia implementada: **Proprietário → Propriedade → Localização**, com chaves estrangeiras e exclusão em cascata (apagar um proprietário apaga suas propriedades e localizações).
-
-### Interface gráfica (Tkinter) 
-
-PARA USAR VAI TER Q BAIXAR O TKINTER 
-
-Substituir os menus de console por uma interface gráfica mínima com **Tkinter** biblioteca padrao.
-
-BOTAO DE CADASTRO FUNCIONANDO CERTO, ATUALIZAR EXCLUIR AINDA EM WIP
+O acompanhamento do que falta fazer fica nas issues do GitHub.
