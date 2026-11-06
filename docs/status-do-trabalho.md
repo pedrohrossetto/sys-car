@@ -17,8 +17,7 @@ Legenda: ✅ feito · 🟡 parcial · ❌ falta.
 | Texto sobre classes, interações e interfaces | ✅ | ADRs em `docs/decisoes/`, `docs/cadastro/` e `docs/fiscalizacao/` |
 | Diagramas UML | ✅ | `docs/cadastro/diagramas.pt-br.md` e `docs/fiscalizacao/diagramas.pt-br.md` (casos de uso, sequência, classes, dados); diagrama de pacotes no ADR-001 |
 | Imagens | 🟡 | Capturas do Cadastro em `docs/imagens/` (README e guia do Cadastro). **Falta:** capturas das abas da Fiscalização |
-| Português técnico controlado | ✅ | Arquivos `*.pt-br.md` |
-| Inglês ASD-STE100 | 🟡 | Feito no Cadastro e no ADR-001 (`*.en.md`). **Falta:** versões `*.en.md` da Fiscalização |
+| Português técnico controlado (estilo ASD-STE100) | 🟡 | Cadastro e ADR-001 seguem o padrão. **Falta:** revisar a documentação da Fiscalização (`docs/fiscalizacao/`) no mesmo padrão. As versões em inglês (`*.en.md`) do Cadastro são um extra; o requisito não pede inglês |
 | Leitura fácil | ✅ | `docs/cadastro/guia-leitura-facil.md` e `docs/fiscalizacao/guia-leitura-facil.md` |
 
 ### Padrões de projeto
@@ -105,7 +104,7 @@ O sistema tem, portanto, duas formas de acessar o banco. A aula 09 pede uma lóg
 
 7. ADRs das decisões novas: Singleton, unificação do acesso a dados e operações que não existem de propósito.
 8. Diagramas de classe atualizados depois da unificação e do Singleton.
-9. Versões `*.en.md` (ASD-STE100) da documentação da Fiscalização.
+9. Revisão da documentação da Fiscalização em português técnico controlado (estilo ASD-STE100).
 10. Capturas de tela das abas da Fiscalização e das telas novas.
 11. README atualizado.
 
