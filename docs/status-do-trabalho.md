@@ -61,7 +61,7 @@ Legenda: ✅ feito · 🟡 parcial · ❌ falta.
 | 09 | 23/10 | Unificar o acesso a dados com a GUI (MVC): adicionar, listar | 🟡 | Funciona, mas há **duas camadas de acesso a dados** (ver abaixo) |
 | 10 | 30/10 | Unificar o acesso a dados (MVC): atualizar, remover | 🟡 | Mesma situação da aula 09 |
 | 11 | 06/11 | Unificar o acesso a dados (MVC): relacionamentos | 🟡 | Chaves estrangeiras e `ON DELETE CASCADE` no banco. **Falta:** uma tela que mostre os dados relacionados juntos |
-| 12 | 13/11 | Persistência com GUI | 🟡 | Exportação da declaração em `.txt`. Pode ser reforçado |
+| 12 | 13/11 | Persistência com GUI | ✅ | A GUI grava e lê os dados no SQLite; exportação da declaração em `.txt`. Exportar e importar em CSV é um reforço opcional |
 | T2 | 27/11 | Entrega e apresentação final | ❌ | — |
 
 ### CRUD por entidade (aula 08)
@@ -94,8 +94,8 @@ O sistema tem, portanto, duas formas de acessar o banco. A aula 09 pede uma lóg
 ### Código
 
 1. **Unificar o acesso a dados:** fazer os models da Fiscalização usarem o `ModeloBase` (aulas 09 e 10).
-2. **Singleton:** aplicar onde há motivo real. Candidato: `PublicadorAlertas`, porque hoje cada `AlertaController` cria o seu (`src/controller/fiscalizacao/alerta_controller.py:19`) (aula 02).
-3. **Completar o CRUD** de alertas, evidências, embargos e declarações, ou documentar por que uma operação não existe (aula 08).
+2. **Singleton:** aplicar onde há motivo real. Candidato: `PublicadorAlertas`, porque hoje cada `AlertaController` cria o seu (`src/controller/fiscalizacao/alerta_controller.py:21`) (aula 02).
+3. **Completar o CRUD** de alertas, evidências, embargos, declarações e notificações, ou documentar por que uma operação não existe (aula 08).
 4. **Relacionamentos na tela:** uma "ficha da propriedade" com dono, localização, alertas, embargo ativo e declarações (aula 11).
 5. **Persistência (opcional):** exportação/importação em CSV ou backup do banco pelo menu Arquivo (aula 12).
 6. **Testes** para tudo o que for criado ou alterado.
