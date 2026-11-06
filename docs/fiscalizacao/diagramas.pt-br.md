@@ -33,6 +33,8 @@ flowchart LR
 
 ## Estados do alerta (State)
 
+Este diagrama mostra os status do alerta e as mudanças de status permitidas.
+
 ```mermaid
 stateDiagram-v2
     [*] --> PENDENTE: alerta criado
@@ -46,6 +48,13 @@ stateDiagram-v2
 ```
 
 ## Sequência: reportar → notificar → examinar → embargar
+
+Este diagrama mostra o caminho de um alerta:
+
+1. O usuário reporta o desmatamento.
+2. O sistema notifica as unidades competentes.
+3. A unidade confirma o alerta.
+4. A unidade embarga a propriedade.
 
 ```mermaid
 sequenceDiagram
@@ -79,6 +88,8 @@ sequenceDiagram
 
 ## Sequência: pedir declaração de conformidade
 
+Este diagrama mostra como o sistema decide se emite ou nega a declaração de conformidade.
+
 ```mermaid
 sequenceDiagram
     actor Proprietario as Proprietário
@@ -106,7 +117,11 @@ sequenceDiagram
 
 ## Classes da implementação
 
-`FonteDeteccao` é o Factory Method, `EstadoAlerta` é o State e `ObservadorAlerta`/`PublicadorAlertas` formam o Observer.
+Este diagrama mostra onde está cada padrão de projeto:
+
+- `FonteDeteccao` aplica o Factory Method.
+- `EstadoAlerta` aplica o State.
+- `ObservadorAlerta` e `PublicadorAlertas` aplicam o Observer.
 
 ```mermaid
 classDiagram

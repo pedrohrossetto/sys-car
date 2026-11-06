@@ -5,16 +5,18 @@
 ## Contexto
 
 O usuário denunciante tem CPF. O Cadastro tem um validador completo de CPF, com dígito verificador.
-A Fiscalização foi desenvolvida ao mesmo tempo e não podia depender de código que ainda não existia.
+O grupo desenvolveu a Fiscalização ao mesmo tempo que o Cadastro.
+Por isso, a Fiscalização não podia depender de código que ainda não existia.
 
 ## Decisão
 
 Validar o CPF do usuário só pelo formato: 11 dígitos, depois de remover pontos e hífen.
-O banco guarda só os dígitos, e o CPF é único na tabela `usuarios`.
+O banco guarda só os dígitos.
+O CPF é único na tabela `usuarios`.
 
 ## Consequências
 
-- Um CPF com 11 dígitos e dígito verificador errado é aceito para o usuário denunciante.
+- O sistema aceita, para o usuário denunciante, um CPF com 11 dígitos e dígito verificador errado.
 - Depois da integração, a melhoria é usar o `ValidadorCPF` do Cadastro (`src/model/documento.py`).
   Essa melhoria deve virar uma issue.
 
