@@ -7,6 +7,7 @@
 | [Arquitetura](decisoes/ADR-001-arquitetura-mvc-plugins.pt-br.md) ([EN](decisoes/ADR-001-arquitetura-mvc-plugins.en.md)) | MVC, contrato de plugin e diagrama de pacotes |
 | [Cadastro](cadastro/README.md) | Proprietários, propriedades e localizações |
 | [Fiscalização](fiscalizacao/README.md) | Alertas, notificações, embargos e declarações |
+| [Status do trabalho](status-do-trabalho.md) | O que já foi feito e o que falta para a entrega final |
 
 ## Idiomas
 
