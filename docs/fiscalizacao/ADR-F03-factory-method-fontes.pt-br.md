@@ -6,7 +6,10 @@
 
 Um alerta pode vir de um satélite ou de uma denúncia de usuário.
 Cada origem preenche um campo diferente no registro (`satelite_id` ou `usuario_id`).
-As regras também são diferentes: a denúncia de usuário exige pelo menos uma evidência, e o satélite não.
+As regras também são diferentes:
+
+- a denúncia de usuário exige pelo menos uma evidência;
+- o alerta do satélite não exige evidência.
 
 ## Decisão
 
@@ -17,7 +20,7 @@ Usar o padrão **Factory Method**:
   Cada um devolve um `RegistroDesmatamento` com a própria origem preenchida.
 - `Satelite.detectar_desmatamento()` cria o registro sem exigir evidência.
 - `Usuario.reportar_desmatamento()` exige pelo menos uma evidência e depois chama o método fábrica.
-- O registro sempre nasce com status PENDENTE.
+- Todo alerta começa com o status PENDENTE.
 
 ## Consequências
 

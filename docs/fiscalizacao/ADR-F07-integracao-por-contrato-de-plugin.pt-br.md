@@ -4,8 +4,8 @@
 
 ## Contexto
 
-A Fiscalização foi desenvolvida ao mesmo tempo que o Cadastro, em outro branch.
-Os dois branches precisavam ser integrados sem conflito de merge e sem quebrar nada.
+O grupo desenvolveu a Fiscalização ao mesmo tempo que o Cadastro, em outro branch.
+O grupo precisava integrar os dois branches sem conflito de merge e sem erros.
 
 ## Decisão
 
@@ -27,8 +27,10 @@ Os dois branches precisavam ser integrados sem conflito de merge e sem quebrar n
 ## Consequências
 
 - O merge não tem conflito, em qualquer ordem.
-- Antes da integração, as abas são testadas pelo `_demo.py`. Depois, elas aparecem sozinhas na janela principal.
-- Depois da integração, migrar os models para o `ModeloBase` é uma melhoria possível. Ela deve virar uma issue.
+- Antes da integração, o `_demo.py` testa as abas.
+- Depois da integração, as abas aparecem automaticamente na janela principal.
+- Depois da integração, migrar os models para o `ModeloBase` é uma melhoria possível.
+  Essa melhoria está na issue #3.
 
 ## Onde está no código
 

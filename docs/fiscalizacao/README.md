@@ -2,6 +2,20 @@
 
 A área de Fiscalização registra alertas de desmatamento, avisa as unidades competentes, controla embargos e emite declarações de conformidade ambiental.
 
+## Termos
+
+Esta documentação usa estes termos com um significado fixo:
+
+| Termo | Significado | Classe no código |
+|---|---|---|
+| Alerta | Registro de um desmatamento detectado | `RegistroDesmatamento` |
+| Fonte | Origem do alerta: um satélite ou um usuário denunciante | `FonteDeteccao`, `Satelite`, `Usuario` |
+| Evidência | Prova anexada a um alerta: foto, vídeo, documento, imagem de satélite ou outro | `Evidencia` |
+| Unidade competente | Órgão que examina os alertas e aplica embargos | `UnidadeCompetente` |
+| Notificação | Aviso que o sistema grava para uma unidade competente | `Notificacao` |
+| Embargo | Bloqueio de uma propriedade por causa de um alerta confirmado | `Embargo` |
+| Declaração | Documento que diz se a propriedade está em conformidade ambiental | `Declaracao` |
+
 ## Decisões de projeto
 
 | ADR | Assunto |

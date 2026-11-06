@@ -4,7 +4,7 @@
 
 ## Contexto
 
-Quando um alerta é criado ou muda de status, as unidades competentes precisam ser avisadas.
+O sistema precisa avisar as unidades competentes quando cria um alerta ou muda o status de um alerta.
 O código que registra o alerta não deve conhecer os detalhes de quem recebe o aviso.
 
 ## Decisão
@@ -20,8 +20,8 @@ Usar o padrão **Observer**:
 ## Consequências
 
 - Um aviso novo (por exemplo, por e-mail) é um observador novo. O controller não muda.
-- Sem unidades cadastradas, nenhuma notificação é criada e nada quebra.
-- A notificação é só um registro no banco. Não há envio real de mensagem.
+- Se não há unidades cadastradas, o sistema não cria notificações. Isso não causa erro.
+- A notificação é só uma linha no banco. O sistema não envia mensagens reais.
 
 ## Onde está no código
 
