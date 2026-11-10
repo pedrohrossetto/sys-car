@@ -106,7 +106,7 @@ sequenceDiagram
 
 ## Classes da implementação
 
-`FonteDeteccao` é o Factory Method, `EstadoAlerta` é o State e `ObservadorAlerta`/`PublicadorAlertas` formam o Observer.
+`FonteDeteccao` é o Factory Method, `EstadoAlerta` é o State e `ObservadorAlerta`/`PublicadorAlertas` formam o Observer. O `PublicadorAlertas` também é Singleton (`instancia()`).
 
 ```mermaid
 classDiagram
@@ -151,6 +151,9 @@ classDiagram
         +atualizar(registro, evento)*
     }
     class PublicadorAlertas {
+        <<singleton>>
+        -_instancia$
+        +instancia()$ PublicadorAlertas
         +inscrever(obs)
         +cancelar_inscricao(obs)
         +notificar(registro, evento)
