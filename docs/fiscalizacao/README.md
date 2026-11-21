@@ -29,6 +29,7 @@ Esta documentação usa estes termos com um significado fixo:
 | [ADR-F07](ADR-F07-integracao-por-contrato-de-plugin.pt-br.md) | Integração por contrato de plugin |
 | [ADR-F08](ADR-F08-singleton-publicador-alertas.pt-br.md) | Singleton no publicador de alertas |
 | [ADR-F09](ADR-F09-acesso-a-dados-unificado.pt-br.md) | Acesso a dados unificado no ModeloBase |
+| [ADR-F10](ADR-F10-ficha-da-propriedade.pt-br.md) | Ficha da propriedade |
 
 ## Diagramas
 
