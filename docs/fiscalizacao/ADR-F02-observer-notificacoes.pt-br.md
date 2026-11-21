@@ -16,6 +16,7 @@ Usar o padrão **Observer**:
 - `NotificadorUnidades` é o observador concreto. Ele cria uma `Notificacao` para **cada** unidade competente cadastrada.
 - O `AlertaController` chama `publicador.notificar()` depois de criar um alerta e depois de cada mudança de status.
 - O `AlertaController` aceita outro publicador no construtor. Os testes usam isso para trocar os observadores.
+- Sem publicador no construtor, o `AlertaController` usa o publicador único do sistema (ver [ADR-F08](ADR-F08-singleton-publicador-alertas.pt-br.md)).
 
 ## Consequências
 

@@ -37,6 +37,18 @@ class TestPublicador(unittest.TestCase):
         self.assertEqual(len(observador.eventos), 1)
 
 
+class TestPublicadorSingleton(unittest.TestCase):
+    def test_duas_chamadas_devolvem_o_mesmo_objeto(self):
+        self.assertIs(PublicadorAlertas.instancia(), PublicadorAlertas.instancia())
+
+    def test_construtor_continua_criando_publicador_separado(self):
+        self.assertIsNot(PublicadorAlertas(), PublicadorAlertas.instancia())
+
+    def test_controllers_sem_publicador_usam_a_instancia_unica(self):
+        self.assertIs(AlertaController().publicador, PublicadorAlertas.instancia())
+        self.assertIs(AlertaController().publicador, AlertaController().publicador)
+
+
 class TestAlertas(BancoTemporario):
     def setUp(self):
         super().setUp()
@@ -98,6 +110,14 @@ class TestAlertas(BancoTemporario):
         self.alertas.mudar_status(registro.id, "CONFIRMADO")
         self.assertEqual(self.contar("notificacoes"), 4)
         self.assertIn("CONFIRMADO", self.unidades.listar_notificacoes()[0].mensagem)
+
+    def test_varios_controllers_nao_duplicam_notificacoes(self):
+        self.unidades.criar("IBAMA")
+        self.unidades.criar("FEPAM")
+        AlertaController()
+        AlertaController()
+        self.novo_por_satelite()
+        self.assertEqual(self.contar("notificacoes"), 2)
 
     def test_observer_sem_unidades_nao_quebra(self):
         _, erro = self.novo_por_satelite()

@@ -24,7 +24,7 @@ Legenda: ✅ feito · 🟡 parcial · ❌ falta.
 
 | Requisito | Status | Onde está |
 |---|---|---|
-| Decisões documentadas | ✅ | ADR-C01 a C04 (Cadastro) e ADR-F01 a F07 (Fiscalização) |
+| Decisões documentadas | ✅ | ADR-C01 a C04 (Cadastro) e ADR-F01 a F08 (Fiscalização) |
 | Implementação segue os padrões | ✅ | Template Method (`model/base.py`, `view/aba_crud.py`), Strategy (`model/documento.py`), Factory Method (`model/fiscalizacao/fonte.py`), State (`model/fiscalizacao/status.py`), Observer (`model/fiscalizacao/observador.py`) |
 
 ### Interface gráfica
@@ -55,7 +55,7 @@ Legenda: ✅ feito · 🟡 parcial · ❌ falta.
 
 | Aula | Data | Conteúdo | Status | Situação |
 |---|---|---|---|---|
-| 02 | 21/08 | Padrões criacionais: Factory e **Singleton** | 🟡 | Factory Method existe. **Singleton não existe** em nenhum lugar do código |
+| 02 | 21/08 | Padrões criacionais: Factory e **Singleton** | ✅ | Factory Method nas fontes (ADR-F03) e Singleton no `PublicadorAlertas` (ADR-F08) |
 | 07 | 09/10 | GUI + SGBD: criar e ler | ✅ | Todas as abas criam e listam registros no SQLite |
 | 08 | 16/10 | GUI + SGBD: atualizar e remover | 🟡 | Ver tabela de CRUD abaixo |
 | 09 | 23/10 | Unificar o acesso a dados com a GUI (MVC): adicionar, listar | 🟡 | Funciona, mas há **duas camadas de acesso a dados** (ver abaixo) |
@@ -94,7 +94,7 @@ O sistema tem, portanto, duas formas de acessar o banco. A aula 09 pede uma lóg
 ### Código
 
 1. **Unificar o acesso a dados:** fazer os models da Fiscalização usarem o `ModeloBase` (aulas 09 e 10).
-2. **Singleton:** aplicar onde há motivo real. Candidato: `PublicadorAlertas`, porque hoje cada `AlertaController` cria o seu (`src/controller/fiscalizacao/alerta_controller.py:21`) (aula 02).
+2. ~~**Singleton:**~~ feito no `PublicadorAlertas` com `PublicadorAlertas.instancia()` (ADR-F08, aula 02).
 3. **Completar o CRUD** de alertas, evidências, embargos, declarações e notificações, ou documentar por que uma operação não existe (aula 08).
 4. **Relacionamentos na tela:** uma "ficha da propriedade" com dono, localização, alertas, embargo ativo e declarações (aula 11).
 5. **Persistência (opcional):** exportação/importação em CSV ou backup do banco pelo menu Arquivo (aula 12).
@@ -102,8 +102,8 @@ O sistema tem, portanto, duas formas de acessar o banco. A aula 09 pede uma lóg
 
 ### Documentação
 
-7. ADRs das decisões novas: Singleton, unificação do acesso a dados e operações que não existem de propósito.
-8. Diagramas de classe atualizados depois da unificação e do Singleton.
+7. ADRs das decisões novas: ~~Singleton~~ (ADR-F08), unificação do acesso a dados e operações que não existem de propósito.
+8. Diagramas de classe atualizados depois da unificação (o Singleton já está no diagrama da Fiscalização).
 9. Revisão da documentação da Fiscalização em português técnico controlado (estilo ASD-STE100).
 10. Capturas de tela das abas da Fiscalização e das telas novas.
 11. README atualizado.

@@ -122,6 +122,7 @@ Este diagrama mostra onde está cada padrão de projeto:
 - `FonteDeteccao` aplica o Factory Method.
 - `EstadoAlerta` aplica o State.
 - `ObservadorAlerta` e `PublicadorAlertas` aplicam o Observer.
+- `PublicadorAlertas` também aplica o Singleton: o sistema usa uma única instância, obtida por `instancia()`.
 
 ```mermaid
 classDiagram
@@ -166,6 +167,9 @@ classDiagram
         +atualizar(registro, evento)*
     }
     class PublicadorAlertas {
+        <<singleton>>
+        -_instancia$
+        +instancia()$ PublicadorAlertas
         +inscrever(obs)
         +cancelar_inscricao(obs)
         +notificar(registro, evento)
