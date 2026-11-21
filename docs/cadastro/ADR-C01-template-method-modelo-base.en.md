@@ -18,6 +18,7 @@ Use the **Template Method** pattern in `src/model/base.py`:
   - `COLUNAS`: the columns, without `id`.
   - The hooks `_valores()` and `_de_linha()`, if the default conversion is not applicable.
 - Specific searches (`buscar_por_cpf`, `buscar_por_propriedade`) use the helpers `_buscar_um()` and `_buscar_varios()`.
+- The team added the helper `_existe()` and the `ordem` parameter of `_buscar_varios()` later, for the Fiscalização models (see ADR-F09).
 
 ## Consequences
 
@@ -28,4 +29,5 @@ Use the **Template Method** pattern in `src/model/base.py`:
 ## Location in the code
 
 - `src/model/base.py`: `ModeloBase`.
-- `src/model/proprietario.py`, `src/model/propriedade_rural.py`, `src/model/localizacao.py`: subclasses.
+- `src/model/proprietario.py`, `src/model/propriedade_rural.py`, `src/model/localizacao.py`: Cadastro subclasses.
+- `src/model/fiscalizacao/*.py`: Fiscalização subclasses (see ADR-F09).

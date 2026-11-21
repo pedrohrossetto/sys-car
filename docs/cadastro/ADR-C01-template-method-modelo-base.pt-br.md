@@ -18,6 +18,7 @@ Usar o padrão **Template Method** em `src/model/base.py`:
   - `COLUNAS`: as colunas, sem o `id`;
   - os ganchos `_valores()` e `_de_linha()`, quando a conversão padrão não serve.
 - As buscas específicas (`buscar_por_cpf`, `buscar_por_propriedade`) usam os auxiliares `_buscar_um()` e `_buscar_varios()`.
+- O auxiliar `_existe()` e o parâmetro `ordem` de `_buscar_varios()` foram adicionados depois, para a Fiscalização (ver [ADR-F09](../fiscalizacao/ADR-F09-acesso-a-dados-unificado.pt-br.md)).
 
 ## Consequências
 
@@ -28,4 +29,5 @@ Usar o padrão **Template Method** em `src/model/base.py`:
 ## Onde está no código
 
 - `src/model/base.py`: `ModeloBase`.
-- `src/model/proprietario.py`, `src/model/propriedade_rural.py`, `src/model/localizacao.py`: subclasses.
+- `src/model/proprietario.py`, `src/model/propriedade_rural.py`, `src/model/localizacao.py`: subclasses do Cadastro.
+- `src/model/fiscalizacao/*.py`: subclasses da Fiscalização (ver ADR-F09).

@@ -28,6 +28,7 @@ Esta documentação usa estes termos com um significado fixo:
 | [ADR-F06](ADR-F06-embargo-e-declaracao-como-entidades.pt-br.md) | Embargo e declaração como entidades |
 | [ADR-F07](ADR-F07-integracao-por-contrato-de-plugin.pt-br.md) | Integração por contrato de plugin |
 | [ADR-F08](ADR-F08-singleton-publicador-alertas.pt-br.md) | Singleton no publicador de alertas |
+| [ADR-F09](ADR-F09-acesso-a-dados-unificado.pt-br.md) | Acesso a dados unificado no ModeloBase |
 
 ## Diagramas
 

@@ -58,8 +58,8 @@ Legenda: ✅ feito · 🟡 parcial · ❌ falta.
 | 02 | 21/08 | Padrões criacionais: Factory e **Singleton** | ✅ | Factory Method nas fontes (ADR-F03) e Singleton no `PublicadorAlertas` (ADR-F08) |
 | 07 | 09/10 | GUI + SGBD: criar e ler | ✅ | Todas as abas criam e listam registros no SQLite |
 | 08 | 16/10 | GUI + SGBD: atualizar e remover | 🟡 | Ver tabela de CRUD abaixo |
-| 09 | 23/10 | Unificar o acesso a dados com a GUI (MVC): adicionar, listar | 🟡 | Funciona, mas há **duas camadas de acesso a dados** (ver abaixo) |
-| 10 | 30/10 | Unificar o acesso a dados (MVC): atualizar, remover | 🟡 | Mesma situação da aula 09 |
+| 09 | 23/10 | Unificar o acesso a dados com a GUI (MVC): adicionar, listar | ✅ | Todos os models herdam do `ModeloBase` (issue #3, ADR-F09) |
+| 10 | 30/10 | Unificar o acesso a dados (MVC): atualizar, remover | ✅ | Mesma situação da aula 09 |
 | 11 | 06/11 | Unificar o acesso a dados (MVC): relacionamentos | 🟡 | Chaves estrangeiras e `ON DELETE CASCADE` no banco. **Falta:** uma tela que mostre os dados relacionados juntos |
 | 12 | 13/11 | Persistência com GUI | ✅ | A GUI grava e lê os dados no SQLite; exportação da declaração em `.txt`. Exportar e importar em CSV é um reforço opcional |
 | T2 | 27/11 | Entrega e apresentação final | ❌ | — |
@@ -85,15 +85,15 @@ Nem toda operação faltante precisa existir. Exemplos: uma declaração emitida
 ### Acesso a dados (aulas 09 e 10)
 
 - **Cadastro:** os models herdam de `ModeloBase` (`src/model/base.py`), que concentra INSERT, UPDATE, DELETE e SELECT.
-- **Fiscalização:** os models usam `src/model/fiscalizacao/conexao.py` e cada um escreve o próprio SQL (exemplo: `src/model/fiscalizacao/embargo.py`).
+- **Fiscalização:** os models também herdam de `ModeloBase`. O `conexao.py` foi removido (issue #3, ADR-F09).
 
-O sistema tem, portanto, duas formas de acessar o banco. A aula 09 pede uma lógica única.
+O sistema tem uma só forma de acessar o banco, como pedem as aulas 09 e 10.
 
 ## 3. Lista do que falta para a entrega final
 
 ### Código
 
-1. **Unificar o acesso a dados:** fazer os models da Fiscalização usarem o `ModeloBase` (aulas 09 e 10).
+1. ✅ **Unificar o acesso a dados:** os models da Fiscalização usam o `ModeloBase` (aulas 09 e 10, issue #3).
 2. ~~**Singleton:**~~ feito no `PublicadorAlertas` com `PublicadorAlertas.instancia()` (ADR-F08, aula 02).
 3. **Completar o CRUD** de alertas, evidências, embargos, declarações e notificações, ou documentar por que uma operação não existe (aula 08).
 4. **Relacionamentos na tela:** uma "ficha da propriedade" com dono, localização, alertas, embargo ativo e declarações (aula 11).
