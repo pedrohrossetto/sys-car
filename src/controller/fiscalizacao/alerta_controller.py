@@ -8,18 +8,23 @@ from model.fiscalizacao.satelite import Satelite
 from model.fiscalizacao.status import StatusAlerta, TransicaoInvalida
 from model.fiscalizacao.usuario import Usuario
 
+# Um só notificador para o publicador único. Como inscrever() ignora
+# observador repetido, criar vários controllers não duplica os avisos.
+_NOTIFICADOR_UNIDADES = NotificadorUnidades()
+
 
 class AlertaController:
     """Registro e exame de alertas de desmatamento.
 
     Usa o Factory Method das fontes para criar o registro, o State para
     mudar o status e o Observer (publicador) para avisar as unidades.
+    Sem publicador no construtor, usa o Singleton ``PublicadorAlertas.instancia()``.
     """
 
     def __init__(self, publicador=None):
         if publicador is None:
-            publicador = PublicadorAlertas()
-            publicador.inscrever(NotificadorUnidades())
+            publicador = PublicadorAlertas.instancia()
+            publicador.inscrever(_NOTIFICADOR_UNIDADES)
         self.publicador = publicador
 
     # ---------------- criação ----------------
