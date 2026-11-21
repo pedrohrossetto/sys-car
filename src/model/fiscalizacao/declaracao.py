@@ -1,4 +1,4 @@
-from model.fiscalizacao.conexao import consultar, consultar_um, executar
+from model.base import ModeloBase
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS declaracoes (
@@ -11,11 +11,12 @@ CREATE TABLE IF NOT EXISTS declaracoes (
 );
 """
 
-_SELECT = "SELECT propriedade_id, data, resultado, motivo, id FROM declaracoes"
 
-
-class Declaracao:
+class Declaracao(ModeloBase):
     """Pedido de declaração de conformidade ambiental (emitida ou negada)."""
+
+    TABELA = "declaracoes"
+    COLUNAS = ("propriedade_id", "data", "resultado", "motivo")
 
     def __init__(self, propriedade_id, data, resultado, motivo=None, id=None):
         self.id = id
@@ -28,18 +29,8 @@ class Declaracao:
     def emitida(self):
         return self.resultado == "EMITIDA"
 
-    def salvar(self):
-        self.id = executar(
-            "INSERT INTO declaracoes (propriedade_id, data, resultado, motivo) "
-            "VALUES (?, ?, ?, ?)",
-            (self.propriedade_id, self.data, self.resultado, self.motivo),
-        )
-
-    @staticmethod
-    def buscar_por_id(id):
-        linha = consultar_um(f"{_SELECT} WHERE id = ?", (id,))
-        return Declaracao(*linha) if linha else None
-
-    @staticmethod
-    def listar_todas():
-        return [Declaracao(*l) for l in consultar(f"{_SELECT} ORDER BY id DESC")]
+    # ---- buscas específicas ----
+    @classmethod
+    def listar_todas(cls):
+        """Da mais nova para a mais antiga."""
+        return cls._buscar_varios("1 = 1", (), ordem="id DESC")
