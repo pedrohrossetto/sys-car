@@ -6,7 +6,7 @@
 
 Um alerta de desmatamento passa pelos status PENDENTE, CONFIRMADO, RESOLVIDO e CANCELADO.
 Nem toda mudança é permitida. Um alerta PENDENTE não pode ir direto para RESOLVIDO.
-Com `if/elif` espalhados, cada tela e cada controller teria de repetir as regras.
+Sem um padrão, cada tela e cada controller repete as regras em blocos `if/elif`.
 
 ## Decisão
 
@@ -19,8 +19,10 @@ Usar o padrão **State** em `src/model/fiscalizacao/status.py`:
   - CONFIRMADO → RESOLVIDO;
   - RESOLVIDO e CANCELADO são finais.
 - `RegistroDesmatamento.mudar_status()` delega a mudança ao estado atual (`estado.ir_para()`).
-  Uma transição inválida levanta `TransicaoInvalida`. O controller devolve `(None, "mensagem")`.
-- Cada estado também declara `BLOQUEIA_CONFORMIDADE`. PENDENTE e CONFIRMADO impedem a declaração.
+  Se a transição é inválida, o estado lança a exceção `TransicaoInvalida`.
+  Então o controller devolve `(None, "mensagem")`.
+- Cada estado também declara `BLOQUEIA_CONFORMIDADE`.
+  Um alerta PENDENTE ou CONFIRMADO impede a declaração de conformidade.
 
 ## Consequências
 
