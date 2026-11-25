@@ -60,7 +60,7 @@ Legenda: ✅ feito · 🟡 parcial · ❌ falta.
 | 08 | 16/10 | GUI + SGBD: atualizar e remover | 🟡 | Ver tabela de CRUD abaixo |
 | 09 | 23/10 | Unificar o acesso a dados com a GUI (MVC): adicionar, listar | ✅ | Todos os models herdam do `ModeloBase` (issue #3, ADR-F09) |
 | 10 | 30/10 | Unificar o acesso a dados (MVC): atualizar, remover | ✅ | Mesma situação da aula 09 |
-| 11 | 06/11 | Unificar o acesso a dados (MVC): relacionamentos | 🟡 | Chaves estrangeiras e `ON DELETE CASCADE` no banco. **Falta:** uma tela que mostre os dados relacionados juntos |
+| 11 | 06/11 | Unificar o acesso a dados (MVC): relacionamentos | ✅ | Chaves estrangeiras e `ON DELETE CASCADE` no banco. A aba "Ficha da Propriedade" mostra os dados relacionados juntos (issue #6, ADR-F10) |
 | 12 | 13/11 | Persistência com GUI | ✅ | A GUI grava e lê os dados no SQLite; exportação da declaração em `.txt`. Exportar e importar em CSV é um reforço opcional |
 | T2 | 27/11 | Entrega e apresentação final | ❌ | — |
 
@@ -96,7 +96,7 @@ O sistema tem uma só forma de acessar o banco, como pedem as aulas 09 e 10.
 1. ✅ **Unificar o acesso a dados:** os models da Fiscalização usam o `ModeloBase` (aulas 09 e 10, issue #3).
 2. ~~**Singleton:**~~ feito no `PublicadorAlertas` com `PublicadorAlertas.instancia()` (ADR-F08, aula 02).
 3. **Completar o CRUD** de alertas, evidências, embargos, declarações e notificações, ou documentar por que uma operação não existe (aula 08).
-4. **Relacionamentos na tela:** uma "ficha da propriedade" com dono, localização, alertas, embargo ativo e declarações (aula 11).
+4. ✅ **Relacionamentos na tela:** a aba "Ficha da Propriedade" mostra dono, localização, alertas, embargo ativo e declarações (aula 11, issue #6).
 5. **Persistência (opcional):** exportação/importação em CSV ou backup do banco pelo menu Arquivo (aula 12).
 6. **Testes** para tudo o que for criado ou alterado.
 

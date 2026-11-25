@@ -34,3 +34,8 @@ class Declaracao(ModeloBase):
     def listar_todas(cls):
         """Da mais nova para a mais antiga."""
         return cls._buscar_varios("1 = 1", (), ordem="id DESC")
+
+    @classmethod
+    def listar_por_propriedade(cls, propriedade_id):
+        """Da mais nova para a mais antiga."""
+        return cls._buscar_varios("propriedade_id = ?", (propriedade_id,), ordem="id DESC")
