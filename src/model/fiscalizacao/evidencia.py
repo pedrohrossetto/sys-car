@@ -1,4 +1,4 @@
-from model.fiscalizacao.conexao import consultar, executar
+from model.base import ModeloBase
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS evidencias (
@@ -14,7 +14,10 @@ CREATE TABLE IF NOT EXISTS evidencias (
 TIPOS_EVIDENCIA = ("Foto", "Vídeo", "Documento", "Imagem de satélite", "Outro")
 
 
-class Evidencia:
+class Evidencia(ModeloBase):
+    TABELA = "evidencias"
+    COLUNAS = ("registro_id", "tipo", "link", "data")
+
     def __init__(self, registro_id, tipo, link, data, id=None):
         self.id = id
         self.registro_id = registro_id
@@ -22,17 +25,7 @@ class Evidencia:
         self.link = link
         self.data = data
 
-    def salvar(self):
-        self.id = executar(
-            "INSERT INTO evidencias (registro_id, tipo, link, data) VALUES (?, ?, ?, ?)",
-            (self.registro_id, self.tipo, self.link, self.data),
-        )
-
-    @staticmethod
-    def listar_por_registro(registro_id):
-        linhas = consultar(
-            "SELECT registro_id, tipo, link, data, id FROM evidencias "
-            "WHERE registro_id = ? ORDER BY id",
-            (registro_id,),
-        )
-        return [Evidencia(*l) for l in linhas]
+    # ---- buscas específicas ----
+    @classmethod
+    def listar_por_registro(cls, registro_id):
+        return cls._buscar_varios("registro_id = ?", (registro_id,))

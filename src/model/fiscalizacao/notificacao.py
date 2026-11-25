@@ -1,4 +1,4 @@
-from model.fiscalizacao.conexao import consultar, executar
+from model.base import ModeloBase
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS notificacoes (
@@ -13,10 +13,11 @@ CREATE TABLE IF NOT EXISTS notificacoes (
 );
 """
 
-_SELECT = "SELECT registro_id, unidade_id, data, mensagem, status, id FROM notificacoes"
 
+class Notificacao(ModeloBase):
+    TABELA = "notificacoes"
+    COLUNAS = ("registro_id", "unidade_id", "data", "mensagem", "status")
 
-class Notificacao:
     def __init__(self, registro_id, unidade_id, data, mensagem, status="ENVIADA", id=None):
         self.id = id
         self.registro_id = registro_id
@@ -25,26 +26,12 @@ class Notificacao:
         self.mensagem = mensagem
         self.status = status
 
-    def salvar(self):
-        if self.id is None:
-            self.id = executar(
-                "INSERT INTO notificacoes (registro_id, unidade_id, data, status, mensagem) "
-                "VALUES (?, ?, ?, ?, ?)",
-                (self.registro_id, self.unidade_id, self.data, self.status, self.mensagem),
-            )
-        else:
-            executar("UPDATE notificacoes SET status = ? WHERE id = ?", (self.status, self.id))
+    # ---- buscas específicas ----
+    @classmethod
+    def listar_todas(cls):
+        """Da mais nova para a mais antiga."""
+        return cls._buscar_varios("1 = 1", (), ordem="id DESC")
 
-    @staticmethod
-    def buscar_por_id(id):
-        linhas = consultar(f"{_SELECT} WHERE id = ?", (id,))
-        return Notificacao(*linhas[0]) if linhas else None
-
-    @staticmethod
-    def listar_todas():
-        return [Notificacao(*l) for l in consultar(f"{_SELECT} ORDER BY id DESC")]
-
-    @staticmethod
-    def listar_por_registro(registro_id):
-        linhas = consultar(f"{_SELECT} WHERE registro_id = ? ORDER BY id", (registro_id,))
-        return [Notificacao(*l) for l in linhas]
+    @classmethod
+    def listar_por_registro(cls, registro_id):
+        return cls._buscar_varios("registro_id = ?", (registro_id,))

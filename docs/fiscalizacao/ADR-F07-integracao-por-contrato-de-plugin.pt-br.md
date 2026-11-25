@@ -23,14 +23,14 @@ O grupo precisava integrar os dois branches sem conflito de merge e sem erros.
    Esse acesso fica isolado em `controller/fiscalizacao/propriedades.py`.
 5. Os models usam funções de acesso próprias (`conexao.py`: `executar`, `consultar`, `consultar_um`).
    Eles não herdam do `ModeloBase` do Cadastro, porque ele não existia no início do desenvolvimento.
+   **Este item foi substituído pela [ADR-F09](ADR-F09-acesso-a-dados-unificado.pt-br.md).** Agora os models herdam do `ModeloBase`, e o `conexao.py` não existe mais.
 
 ## Consequências
 
 - O merge não tem conflito, em qualquer ordem.
 - Antes da integração, o `_demo.py` testa as abas.
 - Depois da integração, as abas aparecem automaticamente na janela principal.
-- Depois da integração, migrar os models para o `ModeloBase` é uma melhoria possível.
-  Essa melhoria está na issue #3.
+- Depois da integração, a migração dos models para o `ModeloBase` foi feita na issue #3 (ver [ADR-F09](ADR-F09-acesso-a-dados-unificado.pt-br.md)).
 
 ## Onde está no código
 

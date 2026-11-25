@@ -1,4 +1,4 @@
-from model.fiscalizacao.conexao import consultar, consultar_um, executar
+from model.base import ModeloBase
 from model.fiscalizacao.status import StatusAlerta, estado_de
 
 SCHEMA = """
@@ -18,14 +18,15 @@ CREATE TABLE IF NOT EXISTS registros_desmatamento (
 );
 """
 
-_COLUNAS = (
-    "id, descricao, data, status, latitude, longitude, "
-    "propriedade_id, satelite_id, usuario_id"
-)
 
-
-class RegistroDesmatamento:
+class RegistroDesmatamento(ModeloBase):
     """Alerta de desmatamento. As coordenadas ficam embutidas (ADR-F04)."""
+
+    TABELA = "registros_desmatamento"
+    COLUNAS = (
+        "descricao", "data", "status", "latitude", "longitude",
+        "propriedade_id", "satelite_id", "usuario_id",
+    )
 
     def __init__(self, propriedade_id, descricao, data, latitude, longitude,
                  satelite_id=None, usuario_id=None, status="PENDENTE", id=None):
@@ -47,57 +48,14 @@ class RegistroDesmatamento:
         """State: o estado atual decide se a transição é permitida."""
         self.status = self.estado.ir_para(novo_status).STATUS.value
 
-    def salvar(self):
-        valores = (
-            self.descricao, self.data, self.status, self.latitude, self.longitude,
-            self.propriedade_id, self.satelite_id, self.usuario_id,
-        )
-        if self.id is None:
-            self.id = executar(
-                "INSERT INTO registros_desmatamento (descricao, data, status, latitude, "
-                "longitude, propriedade_id, satelite_id, usuario_id) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                valores,
-            )
-        else:
-            executar(
-                "UPDATE registros_desmatamento SET descricao = ?, data = ?, status = ?, "
-                "latitude = ?, longitude = ?, propriedade_id = ?, satelite_id = ?, "
-                "usuario_id = ? WHERE id = ?",
-                valores + (self.id,),
-            )
+    # ---- buscas específicas ----
+    @classmethod
+    def listar_por_propriedade(cls, propriedade_id):
+        return cls._buscar_varios("propriedade_id = ?", (propriedade_id,))
 
-    @staticmethod
-    def _de_linha(linha):
-        id, descricao, data, status, lat, lon, prop, sat, usu = linha
-        return RegistroDesmatamento(prop, descricao, data, lat, lon, sat, usu, status, id)
-
-    @staticmethod
-    def buscar_por_id(id):
-        linha = consultar_um(
-            f"SELECT {_COLUNAS} FROM registros_desmatamento WHERE id = ?", (id,)
-        )
-        return RegistroDesmatamento._de_linha(linha) if linha else None
-
-    @staticmethod
-    def listar_todos():
-        linhas = consultar(f"SELECT {_COLUNAS} FROM registros_desmatamento ORDER BY id")
-        return [RegistroDesmatamento._de_linha(l) for l in linhas]
-
-    @staticmethod
-    def listar_por_propriedade(propriedade_id):
-        linhas = consultar(
-            f"SELECT {_COLUNAS} FROM registros_desmatamento "
-            "WHERE propriedade_id = ? ORDER BY id",
-            (propriedade_id,),
-        )
-        return [RegistroDesmatamento._de_linha(l) for l in linhas]
-
-    @staticmethod
-    def existe_da_fonte(coluna, fonte_id):
+    @classmethod
+    def existe_da_fonte(cls, coluna, fonte_id):
         """True se algum registro veio do satélite/usuário informado."""
         if coluna not in ("satelite_id", "usuario_id"):
             raise ValueError("coluna inválida")
-        return consultar_um(
-            f"SELECT 1 FROM registros_desmatamento WHERE {coluna} = ? LIMIT 1", (fonte_id,)
-        ) is not None
+        return cls._existe(f"{coluna} = ?", (fonte_id,))

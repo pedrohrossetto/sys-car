@@ -9,6 +9,8 @@ class ModeloBase:
       - TABELA: nome da tabela;
       - COLUNAS: colunas além do id, na mesma ordem dos atributos;
       - _valores() e _de_linha(): ganchos de conversão objeto <-> linha.
+    As buscas específicas usam os auxiliares _buscar_um(), _buscar_varios()
+    e _existe(). _buscar_varios() aceita a ordem da listagem (padrão: id).
     O construtor da subclasse precisa aceitar as COLUNAS e 'id' como
     argumentos nomeados.
     """
@@ -80,12 +82,23 @@ class ModeloBase:
         return cls._de_linha(linha) if linha else None
 
     @classmethod
-    def _buscar_varios(cls, condicao, parametros):
+    def _buscar_varios(cls, condicao, parametros, ordem="id"):
         conn = get_connection()
         try:
             linhas = conn.execute(
-                f"{cls._select()} WHERE {condicao} ORDER BY id", parametros
+                f"{cls._select()} WHERE {condicao} ORDER BY {ordem}", parametros
             ).fetchall()
         finally:
             conn.close()
         return [cls._de_linha(linha) for linha in linhas]
+
+    @classmethod
+    def _existe(cls, condicao, parametros):
+        conn = get_connection()
+        try:
+            linha = conn.execute(
+                f"SELECT 1 FROM {cls.TABELA} WHERE {condicao} LIMIT 1", parametros
+            ).fetchone()
+        finally:
+            conn.close()
+        return linha is not None
