@@ -119,14 +119,30 @@ sequenceDiagram
 
 Este diagrama mostra onde está cada padrão de projeto:
 
+- `ModeloBase` aplica o Template Method: o SQL de INSERT, UPDATE, DELETE e SELECT fica só nele. Cada model declara `TABELA` e `COLUNAS`. Os 8 models da Fiscalização herdam dele, como os do Cadastro.
+- `PropriedadeRural`, `Proprietario` e `Localizacao` são do Cadastro. Aparecem aqui só para mostrar o contrato `propriedades.py`, que é o único ponto de acesso da Fiscalização ao Cadastro.
 - `FonteDeteccao` aplica o Factory Method.
 - `EstadoAlerta` aplica o State.
 - `ObservadorAlerta` e `PublicadorAlertas` aplicam o Observer.
-- `PublicadorAlertas` também aplica o Singleton: o sistema usa uma única instância, obtida por `instancia()`.
+- `PublicadorAlertas` também aplica o Singleton: o sistema usa uma única instância, obtida por `instancia()`. O construtor continua público para os testes injetarem publicadores isolados.
 
 ```mermaid
 classDiagram
     direction LR
+    class ModeloBase {
+        <<abstract>>
+        +TABELA
+        +COLUNAS
+        +salvar()
+        +deletar()
+        +buscar_por_id(id)$
+        +listar_todos()$
+        #_valores()
+        #_de_linha(linha)$
+        #_buscar_um(condicao, parametros)$
+        #_buscar_varios(condicao, parametros, ordem="id")$
+        #_existe(condicao, parametros)$
+    }
     class FonteDeteccao {
         <<abstract>>
         +criar_registro(...)*
@@ -151,11 +167,15 @@ classDiagram
         +propriedade_id
         +estado
         +mudar_status(novo)
+        +listar_por_propriedade(id)$
+        +existe_da_fonte(coluna, fonte_id)$
     }
     class EstadoAlerta {
         <<abstract>>
+        +STATUS
         +PROXIMOS
         +BLOQUEIA_CONFORMIDADE
+        +finalizado
         +ir_para(novo)
     }
     class Pendente
@@ -178,13 +198,64 @@ classDiagram
     class Evidencia
     class Notificacao
     class UnidadeCompetente
-    class Embargo
-    class Declaracao
+    class Embargo {
+        +buscar_ativo(propriedade_id)$
+        +existe_da_unidade(unidade_id)$
+    }
+    class Declaracao {
+        +emitida
+        +listar_todas()$
+        +listar_por_propriedade(propriedade_id)$
+    }
     class AlertaController
     class ConformidadeController
     class FonteController
     class UnidadeController
+    class FichaAba {
+        +ORDEM = 90
+        +mostrar()
+        +recarregar()
+    }
+    class FichaController {
+        +listar_propriedades()
+        +montar(propriedade_id) (FichaPropriedade, erro)
+        +descrever_origem(alerta)
+    }
+    class FichaPropriedade {
+        <<dataclass>>
+        +propriedade
+        +proprietario
+        +localizacao
+        +alertas
+        +embargo_ativo
+        +unidade_do_embargo
+        +declaracoes
+        +alertas_em_aberto
+        +situacao
+    }
+    class Propriedades {
+        <<módulo>>
+        +listar_propriedades()
+        +buscar_propriedade(id)
+        +nomes_das_propriedades()
+        +buscar_proprietario(proprietario_id)
+        +buscar_localizacao(propriedade_id)
+    }
+    class PropriedadeRural
+    class Proprietario
+    class Localizacao
 
+    ModeloBase <|-- Satelite
+    ModeloBase <|-- Usuario
+    ModeloBase <|-- UnidadeCompetente
+    ModeloBase <|-- RegistroDesmatamento
+    ModeloBase <|-- Evidencia
+    ModeloBase <|-- Notificacao
+    ModeloBase <|-- Embargo
+    ModeloBase <|-- Declaracao
+    ModeloBase <|-- PropriedadeRural
+    ModeloBase <|-- Proprietario
+    ModeloBase <|-- Localizacao
     FonteDeteccao <|-- Satelite
     FonteDeteccao <|-- Usuario
     FonteDeteccao ..> RegistroDesmatamento : cria
@@ -208,6 +279,20 @@ classDiagram
     FonteController ..> Satelite
     FonteController ..> Usuario
     UnidadeController ..> UnidadeCompetente
+    FichaAba --> FichaController
+    FichaAba ..> FichaPropriedade : mostra
+    FichaController ..> FichaPropriedade : cria
+    FichaController ..> Propriedades
+    FichaController ..> RegistroDesmatamento
+    FichaController ..> Embargo
+    FichaController ..> Declaracao
+    FichaController ..> UnidadeCompetente
+    FichaController ..> Satelite
+    FichaController ..> Usuario
+    FichaPropriedade ..> EstadoAlerta : BLOQUEIA_CONFORMIDADE
+    Propriedades ..> PropriedadeRural
+    Propriedades ..> Proprietario
+    Propriedades ..> Localizacao
 ```
 
 ## Modelo de dados
