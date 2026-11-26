@@ -21,6 +21,8 @@ Ela guarda:
 
 ## Registrar um alerta
 
+![Tela da aba Alertas](../imagens/aba-alertas.png)
+
 1. Clique na aba **Alertas**.
 2. Clique no mapa, no lugar do desmatamento.
 3. O formulário mostra a propriedade desse lugar.

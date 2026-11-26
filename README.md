@@ -118,6 +118,10 @@ mapa: a área da propriedade é desenhada clique a clique, e o alerta é um cliq
 
 ![Aba Proprietários com dois cadastros na lista](docs/imagens/aba-proprietarios.png)
 
+![Aba Alertas: mapa com as áreas das propriedades e os alertas, lista e formulário do novo alerta](docs/imagens/aba-alertas.png)
+
+![Aba Ficha da Propriedade: área, proprietário, embargo, alertas, declarações e o mapa da propriedade](docs/imagens/aba-ficha.png)
+
 ## Documentação
 
 Toda a documentação técnica (decisões de projeto, diagramas UML em pt-BR e EN e guias em Leitura Fácil) está em [`docs/README.md`](docs/README.md).
