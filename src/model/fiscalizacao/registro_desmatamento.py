@@ -10,17 +10,20 @@ CREATE TABLE IF NOT EXISTS registros_desmatamento (
         CHECK (status IN ('PENDENTE', 'CONFIRMADO', 'RESOLVIDO', 'CANCELADO')),
     latitude REAL NOT NULL CHECK (latitude BETWEEN -90 AND 90),
     longitude REAL NOT NULL CHECK (longitude BETWEEN -180 AND 180),
-    propriedade_id INTEGER NOT NULL
-        REFERENCES propriedades_rurais(id) ON DELETE CASCADE
+    -- A propriedade vem do ponto (ADR-F14): NULL = fora de propriedade cadastrada.
+    propriedade_id INTEGER
+        REFERENCES propriedades_rurais(id) ON DELETE SET NULL
 );
 """
 
 
 class RegistroDesmatamento(ModeloBase):
-    """Alerta de desmatamento. As coordenadas ficam embutidas (ADR-F04).
+    """Alerta de desmatamento: um ponto no mapa (ADR-F14).
 
-    O CRUD vem do ModeloBase (salvar, buscar_por_id, listar_todos, deletar).
-    O status só muda por mudar_status() (State, ADR-F01); ver ADR-F12.
+    A propriedade é a que contém o ponto, gravada na criação; pode ser None.
+    O ponto não muda depois de criado. O CRUD vem do ModeloBase (salvar,
+    buscar_por_id, listar_todos, deletar). O status só muda por
+    mudar_status() (State, ADR-F01); ver ADR-F12.
     """
 
     TABELA = "registros_desmatamento"
@@ -28,6 +31,7 @@ class RegistroDesmatamento(ModeloBase):
 
     def __init__(self, propriedade_id, descricao, data, latitude, longitude,
                  status="PENDENTE", id=None):
+        # propriedade_id pode ser None: o ponto caiu fora de toda propriedade.
         self.id = id
         self.propriedade_id = propriedade_id
         self.descricao = descricao

@@ -12,11 +12,10 @@ from controller.fiscalizacao.ficha_controller import (
     COM_ALERTAS, EMBARGADA, REGULAR, FichaController,
 )
 from controller.fiscalizacao.unidade_controller import UnidadeController
-from controller.localizacao_controller import LocalizacaoController
 from controller.propriedade_rural_controller import PropriedadeRuralController
 from controller.proprietario_controller import ProprietarioController
 from database import database
-from test_fiscalizacao_apoio import BancoTemporario
+from test_fiscalizacao_apoio import BancoTemporario, area_de_teste
 
 
 class TestFichaDaPropriedade(BancoTemporario):
@@ -28,27 +27,27 @@ class TestFichaDaPropriedade(BancoTemporario):
         self.unidade, _ = UnidadeController().criar("IBAMA", "Federal", "ibama@ex.gov")
         # Propriedade completa, criada pelos controllers do Cadastro.
         self.dono, _ = ProprietarioController().criar("Ana", "PF", cpf="529.982.247-25")
-        self.prop, _ = PropriedadeRuralController().criar("Sítio Boa Vista", self.dono.id, "RS-123")
+        self.prop, _ = PropriedadeRuralController().criar(
+            "Sítio Boa Vista", self.dono.id, "RS-123", area_de_teste(9))
 
     def novo_alerta(self, propriedade_id=None):
-        registro, _ = self.alertas.criar(propriedade_id or self.prop.id, "Corte raso", -28.2, -52.4)
+        registro, _ = self.alertas.criar("Corte raso", *self.centro_da(propriedade_id or self.prop.id))
         return registro
 
     def test_propriedade_inexistente(self):
         self.assertEqual(self.fichas.montar(999), (None, "Propriedade não encontrada."))
         self.assertEqual(self.fichas.montar(None)[1], "Propriedade não encontrada.")
 
-    def test_ficha_traz_proprietario_e_localizacao_do_cadastro(self):
-        LocalizacaoController().criar(self.prop.id, -28.26, -52.4, 680, "1,1;1,2;2,2")
+    def test_ficha_traz_proprietario_e_area_do_cadastro(self):
         ficha, erro = self.fichas.montar(self.prop.id)
         self.assertIsNone(erro)
         self.assertEqual(ficha.propriedade.nome, "Sítio Boa Vista")
         self.assertEqual(ficha.proprietario.nome, "Ana")
-        self.assertEqual(ficha.localizacao.altitude, 680.0)
+        self.assertEqual(len(ficha.propriedade.area), 4)
+        self.assertAlmostEqual(ficha.propriedade.area_ha, 108.4, delta=0.5)
 
-    def test_ficha_sem_localizacao_e_sem_fiscalizacao(self):
+    def test_ficha_sem_fiscalizacao(self):
         ficha, _ = self.fichas.montar(self.prop.id)
-        self.assertIsNone(ficha.localizacao)
         self.assertEqual((ficha.alertas, ficha.declaracoes), ([], []))
         self.assertIsNone(ficha.embargo_ativo)
         self.assertEqual(ficha.situacao, REGULAR)

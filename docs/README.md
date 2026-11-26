@@ -5,7 +5,8 @@
 | Área | Conteúdo |
 |---|---|
 | [Arquitetura](decisoes/ADR-001-arquitetura-mvc-plugins.pt-br.md) ([EN](decisoes/ADR-001-arquitetura-mvc-plugins.en.md)) | MVC, contrato de plugin e diagrama de pacotes |
-| [Cadastro](cadastro/README.md) | Proprietários, propriedades e localizações |
+| [Mapa](decisoes/ADR-002-mapa-em-canvas.pt-br.md) ([EN](decisoes/ADR-002-mapa-em-canvas.en.md)) | Mapa próprio em Canvas, sem dependência |
+| [Cadastro](cadastro/README.md) | Proprietários e propriedades (com a área no mapa) |
 | [Fiscalização](fiscalizacao/README.md) | Alertas, notificações, embargos e declarações |
 | [Status do trabalho](status-do-trabalho.md) | O que já foi feito e o que falta para a entrega final |
 

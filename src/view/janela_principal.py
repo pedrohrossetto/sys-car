@@ -21,8 +21,8 @@ class JanelaPrincipal:
     def __init__(self, root):
         self.root = root
         root.title("SYS-CAR")
-        root.geometry("960x640")
-        root.minsize(720, 480)
+        root.geometry("1180x800")
+        root.minsize(960, 640)
         self._criar_menu()
         self.notebook = ttk.Notebook(root)
         self.notebook.pack(fill="both", expand=True, padx=6, pady=6)

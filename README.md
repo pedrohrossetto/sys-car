@@ -41,19 +41,14 @@ direction TB
         -STRING descricao
         -DATE data
         -STATUS_ALERTA status
+        -FLOAT latitude
+        -FLOAT longitude
         +criar()
         +ler()
         +atualizar()
         +excluir()
         +enviarNotificacao(detalhes)
         +atualizarStatus(status)
-    }
-
-    class LOCALIZACAO {
-        -FLOAT latitude
-        -FLOAT longitude
-        -FLOAT altitude
-        -GEOMETRY poligono_geometria
     }
 
     class NOTIFICACAO {
@@ -85,6 +80,10 @@ direction TB
         -INT id
         -STRING nome
         -STRING cadastro_pub
+        -POLIGONO area
+        +centroide()
+        +areaHa()
+        +contem(ponto)
         +gerarDeclaracaoConformidade()
     }
 
@@ -97,26 +96,33 @@ direction TB
     }
 
     %% Relacionamentos
-    REGISTRO_DESMATAMENTO "1" *-- "1" LOCALIZACAO : possui
+    REGISTRO_DESMATAMENTO "0..*" --> "0..1" PROPRIEDADE_RURAL : o ponto cai na área
     REGISTRO_DESMATAMENTO "1" --> "0..*" NOTIFICACAO : gera
     REGISTRO_DESMATAMENTO ..> STATUS_ALERTA : utiliza
 
     NOTIFICACAO "*" --> "1" UNIDADE_COMPETENTE : destinada
     UNIDADE_COMPETENTE "0..*" --> "0..*" PROPRIEDADE_RURAL : embarga
 
-    PROPRIEDADE_RURAL "1" *-- "1" LOCALIZACAO : possui
     PROPRIETARIO "1" --> "1..*" PROPRIEDADE_RURAL : possui
 ```
 
-O diagrama acima é o modelo **conceitual**. Os diagramas da implementação ficam em [`docs/`](docs/README.md).
+O diagrama acima é o modelo **conceitual**. A propriedade tem uma área (polígono) que não se sobrepõe à de outra
+propriedade; o alerta é um ponto no mapa e pertence à propriedade cuja área contém o ponto (ou a nenhuma).
+ Os diagramas da implementação ficam em [`docs/`](docs/README.md).
 
 ## Interface
 
-A janela principal tem uma aba para cada cadastro.
+A janela principal tem uma aba para cada cadastro. As abas Propriedades, Alertas e Ficha da Propriedade têm um
+mapa: a área da propriedade é desenhada clique a clique, e o alerta é um clique no lugar do desmatamento
+(roda do mouse: zoom; arrastar: mover).
 
 ![Aba Proprietários com dois cadastros na lista](docs/imagens/aba-proprietarios.png)
 
-![Aba Localizações com latitude, longitude e polígono preenchidos](docs/imagens/aba-localizacoes.png)
+![Aba Propriedades: formulário, mapa para desenhar a área e lista com a área em hectares](docs/imagens/aba-propriedades.png)
+
+![Aba Alertas: mapa com as áreas das propriedades e os alertas, lista e formulário do novo alerta](docs/imagens/aba-alertas.png)
+
+![Aba Ficha da Propriedade: área, proprietário, embargo, alertas, declarações e o mapa da propriedade](docs/imagens/aba-ficha.png)
 
 ## Documentação
 
@@ -141,15 +147,18 @@ sys-car/
     ├── model/                    # classes de domínio; cada uma declara seu SCHEMA
     │   ├── base.py               # ModeloBase (Template Method)
     │   ├── documento.py          # validadores de CPF/CNPJ (Strategy)
-    │   ├── coordenadas.py        # validação de latitude, longitude e polígono
+    │   ├── coordenadas.py        # validação de latitude, longitude e texto do polígono
+    │   ├── geometria.py          # Poligono: centroide, área, ponto dentro, sobreposição
     │   ├── proprietario.py
-    │   ├── propriedade_rural.py
-    │   └── localizacao.py
+    │   ├── propriedade_rural.py  # com a área (polígono) da propriedade
+    │   └── fiscalizacao/         # alertas, notificações, embargos, declarações
     ├── controller/               # regras de negócio e validações
     └── view/
         ├── janela_principal.py   # janela, menu e descoberta das abas
         ├── aba_crud.py           # AbaCrud (Template Method)
         ├── widgets.py            # Seletor e tabela com rolagem
+        ├── projecao.py           # lat/lon <-> pixels do mapa (sem tkinter)
+        ├── mapa.py               # MapaCanvas e EditorArea (mapa em Canvas)
         └── *_aba.py              # uma aba por entidade
 ```
 

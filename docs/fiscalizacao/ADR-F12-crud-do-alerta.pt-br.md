@@ -1,6 +1,6 @@
 # ADR-F12: CRUD do alerta de desmatamento
 
-**Status:** aceita
+**Status:** aceita, alterada pela [ADR-F14](ADR-F14-ponto-do-alerta-define-a-propriedade.pt-br.md) (as coordenadas não mudam mais no update)
 
 ## Contexto
 

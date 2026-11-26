@@ -12,57 +12,55 @@ flowchart LR
         uc1(["Cadastrar proprietário PF ou PJ"])
         uc2(["Editar ou excluir proprietário"])
         uc3(["Cadastrar propriedade rural"])
-        uc4(["Registrar localização e polígono"])
+        uc4(["Desenhar a área no mapa"])
         uc5(["Validar CPF ou CNPJ"])
-        uc6(["Validar coordenadas"])
+        uc6(["Validar a área e a sobreposição"])
     end
     ator --> uc1
     ator --> uc2
     ator --> uc3
-    ator --> uc4
+    uc3 -. inclui .-> uc4
     uc1 -. inclui .-> uc5
     uc2 -. inclui .-> uc5
     uc4 -. inclui .-> uc6
 ```
 
-## Sequência: cadastrar propriedade com localização
+## Sequência: cadastrar propriedade com a área
 
 ```mermaid
 sequenceDiagram
     actor Operador
     participant PA as PropriedadeAba
+    participant EA as EditorArea
     participant PC as PropriedadeRuralController
-    participant LA as LocalizacaoAba
-    participant LC as LocalizacaoController
-    participant M as Models (ModeloBase)
+    participant G as Poligono
+    participant M as PropriedadeRural (ModeloBase)
     participant DB as SQLite
 
-    Operador->>PA: escolhe proprietário e informa nome
+    Operador->>PA: informa nome e proprietário
+    loop um clique por vértice
+        Operador->>EA: clica no mapa
+        EA->>G: Poligono(vertices) [mostra área e centro]
+    end
     Operador->>PA: Salvar (Enter)
-    PA->>PC: criar(nome, proprietario_id, cadastro)
-    PC->>M: Proprietario.buscar_por_id(id)
-    M->>DB: SELECT
-    PC->>M: PropriedadeRural.salvar()
-    M->>DB: INSERT
-    PC-->>PA: (propriedade, None)
-    PA->>PA: recarregar()
-    Operador->>LA: escolhe propriedade e informa coordenadas
-    Operador->>LA: Salvar (Enter)
-    LA->>LC: criar(propriedade_id, lat, lon, alt, poligono)
-    LC->>LC: converter_latitude/longitude/poligono
-    alt dado inválido
-        LC-->>LA: (None, "mensagem")
-        LA-->>Operador: caixa de erro
-    else dados válidos
-        LC->>M: Localizacao.salvar()
+    PA->>PC: criar(nome, proprietario_id, cadastro, vertices)
+    PC->>G: Poligono(vertices)
+    PC->>M: listar_todos() [áreas das outras propriedades]
+    PC->>G: sobrepoe(outra) para cada área
+    alt área inválida ou sobreposta
+        PC-->>PA: (None, "mensagem")
+        PA-->>Operador: caixa de erro
+    else área válida
+        PC->>M: PropriedadeRural(..., poligono=texto).salvar()
         M->>DB: INSERT
-        LC-->>LA: (localizacao, None)
+        PC-->>PA: (propriedade, None)
     end
 ```
 
 ## Classes da implementação
 
 `ModeloBase` e `AbaCrud` são os pontos de Template Method. `ValidadorDocumento` é a Strategy.
+`Poligono` é um objeto de valor: não tem tabela (ADR-C05). `MapaCanvas` e `Projecao` estão na [ADR-002](../decisoes/ADR-002-mapa-em-canvas.pt-br.md).
 
 ```mermaid
 classDiagram
@@ -75,6 +73,7 @@ classDiagram
         +deletar()
         +buscar_por_id(id)$
         +listar_todos()$
+        +colunas_no_banco()$
         #_valores()
         #_de_linha(linha)$
     }
@@ -91,14 +90,22 @@ classDiagram
         +nome
         +cadastro_publico
         +proprietario_id
+        +poligono
+        +area Poligono
+        +centroide
+        +area_ha
+        +contem(lat, lon)
+        +schema_desatualizado()$
     }
-    class Localizacao {
-        +latitude
-        +longitude
-        +altitude
-        +poligono_geometria
-        +propriedade_id
-        +buscar_por_propriedade(id)$
+    class Poligono {
+        <<objeto de valor>>
+        +vertices
+        +de_texto(texto)$
+        +para_texto()
+        +centroide()
+        +area_ha()
+        +contem(lat, lon)
+        +sobrepoe(outro)
     }
     class ValidadorDocumento {
         <<abstract>>
@@ -108,8 +115,11 @@ classDiagram
     class ValidadorCPF
     class ValidadorCNPJ
     class ProprietarioController
-    class PropriedadeRuralController
-    class LocalizacaoController
+    class PropriedadeRuralController {
+        +criar(nome, proprietario_id, cadastro, poligono)
+        +atualizar(id, ..., poligono)
+        +listar_areas(exceto_id)
+    }
     class AbaCrud {
         <<abstract>>
         +salvar()
@@ -121,35 +131,37 @@ classDiagram
     }
     class ProprietarioAba
     class PropriedadeAba
-    class LocalizacaoAba
+    class EditorArea
+    class MapaCanvas
+    class Projecao
 
     ModeloBase <|-- Proprietario
     ModeloBase <|-- PropriedadeRural
-    ModeloBase <|-- Localizacao
+    PropriedadeRural ..> Poligono : area
     ValidadorDocumento <|-- ValidadorCPF
     ValidadorDocumento <|-- ValidadorCNPJ
     ProprietarioController ..> ValidadorDocumento
     ProprietarioController ..> Proprietario
     PropriedadeRuralController ..> PropriedadeRural
-    LocalizacaoController ..> Localizacao
+    PropriedadeRuralController ..> Poligono : valida e testa sobreposição
     AbaCrud <|-- ProprietarioAba
     AbaCrud <|-- PropriedadeAba
-    AbaCrud <|-- LocalizacaoAba
     ProprietarioAba ..> ProprietarioController
     PropriedadeAba ..> PropriedadeRuralController
-    LocalizacaoAba ..> LocalizacaoController
+    PropriedadeAba *-- EditorArea
+    EditorArea *-- MapaCanvas
+    MapaCanvas *-- Projecao
     Proprietario "1" --> "0..*" PropriedadeRural
-    PropriedadeRural "1" *-- "0..1" Localizacao
 ```
 
 ## Modelo de dados
 
-Apagar um proprietário apaga as propriedades dele e as localizações delas (`ON DELETE CASCADE`).
+Apagar um proprietário apaga as propriedades dele (`ON DELETE CASCADE`).
+A coluna `poligono` aceita NULL no banco, mas o controller exige a área.
 
 ```mermaid
 erDiagram
     proprietarios ||--o{ propriedades_rurais : possui
-    propriedades_rurais ||--o| localizacoes : tem
     proprietarios {
         INTEGER id PK
         TEXT nome
@@ -162,13 +174,6 @@ erDiagram
         TEXT nome
         TEXT cadastro_publico
         INTEGER proprietario_id FK
-    }
-    localizacoes {
-        INTEGER id PK
-        REAL latitude
-        REAL longitude
-        REAL altitude
-        TEXT poligono_geometria
-        INTEGER propriedade_id FK "UNIQUE"
+        TEXT poligono "lat,lon;lat,lon;..."
     }
 ```

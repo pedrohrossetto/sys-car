@@ -21,12 +21,19 @@ Ela guarda:
 
 ## Registrar um alerta
 
+![Tela da aba Alertas](../imagens/aba-alertas.png)
+
 1. Clique na aba **Alertas**.
-2. Escolha a propriedade.
-3. Escreva a data. Se ficar vazia, vale a data de hoje.
-4. Escreva a latitude e a longitude.
-5. Escreva o que aconteceu.
-6. Clique em **Salvar**.
+2. Clique no mapa, no lugar do desmatamento.
+3. O formulário mostra a propriedade desse lugar.
+4. Se o lugar não é de nenhuma propriedade, aparece "fora de propriedade cadastrada".
+5. Escreva a data. Se ficar vazia, vale a data de hoje.
+6. Escreva o que aconteceu.
+7. Clique em **Salvar**.
+
+O mapa mostra as propriedades e os alertas.
+A cor do ponto mostra o estado do alerta:
+amarelo é PENDENTE, vermelho é CONFIRMADO, verde é RESOLVIDO e cinza é CANCELADO.
 
 Todo alerta novo fica **PENDENTE**.
 Os órgãos recebem um aviso.
@@ -35,10 +42,12 @@ Os órgãos recebem um aviso.
 
 1. Na lista de alertas, clique duas vezes no alerta.
 2. Os dados aparecem no formulário.
-3. Mude a data, a latitude, a longitude ou o texto.
+3. Mude a data ou o texto.
 4. Clique em **Salvar**.
 
+O lugar do alerta não muda.
 A propriedade do alerta não muda.
+Se o lugar está errado, apague o alerta e marque outro.
 O estado do alerta não muda aqui.
 
 ## Apagar um alerta
