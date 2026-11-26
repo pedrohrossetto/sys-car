@@ -15,6 +15,18 @@
 - Poderão requisitar declarações de conformidade ambiental, onde será buscado em uma base de alertas de desmatamento se há algum alerta, se não houver, será emitido.
 - As propriedades registradas poderão ser embargadas por autoridades competentes se for comprovado desmatamento ilegal
 
+## Funcionalidades
+
+| Área | O que o sistema faz |
+|---|---|
+| Proprietários | Cadastra pessoa física (CPF) e jurídica (CNPJ, inclusive alfanumérico), com validação do dígito verificador |
+| Propriedades | Cadastra a propriedade com a área desenhada no mapa. Calcula o centro e a área em hectares. Duas áreas não se sobrepõem |
+| Alertas | Registra o desmatamento com um clique no mapa. A propriedade é a que contém o ponto. Edita a descrição e a data e exclui o alerta. O status segue as regras do padrão State |
+| Unidades e notificações | Cadastra os órgãos competentes. Cada alerta novo ou mudança de status gera uma notificação para cada órgão |
+| Embargos | Embarga uma propriedade a partir de um alerta confirmado. Levanta o embargo e altera o motivo |
+| Declarações | Emite ou nega a declaração de conformidade ambiental e salva o texto em `.txt` |
+| Ficha da propriedade | Mostra numa tela só o proprietário, a área, os alertas, o embargo ativo, as declarações e a situação da propriedade |
+
 ## Integrantes:
 
 - Pedro Henrique Carteli Rossetto
@@ -166,6 +178,21 @@ sys-car/
         └── *_aba.py              # uma aba por entidade
 ```
 
+### Padrões de projeto e arquitetura
+
+| Padrão | Onde está | Decisão |
+|---|---|---|
+| MVC com contrato de plugin | `src/model`, `src/controller`, `src/view`, `src/descoberta.py` | [ADR-001](docs/decisoes/ADR-001-arquitetura-mvc-plugins.pt-br.md) |
+| Template Method | `ModeloBase` (`model/base.py`) e `AbaCrud` (`view/aba_crud.py`) | [ADR-C01](docs/cadastro/ADR-C01-template-method-modelo-base.pt-br.md), [ADR-C04](docs/cadastro/ADR-C04-aba-crud-template-method.pt-br.md) |
+| Strategy | Validadores de CPF e CNPJ (`model/documento.py`) | [ADR-C02](docs/cadastro/ADR-C02-strategy-validacao-documento.pt-br.md) |
+| State | Status do alerta (`model/fiscalizacao/status.py`) | [ADR-F01](docs/fiscalizacao/ADR-F01-state-status-alerta.pt-br.md) |
+| Observer | Notificações das unidades (`model/fiscalizacao/observador.py`) | [ADR-F02](docs/fiscalizacao/ADR-F02-observer-notificacoes.pt-br.md) |
+| Singleton | `PublicadorAlertas.instancia()` (`model/fiscalizacao/observador.py`) | [ADR-F08](docs/fiscalizacao/ADR-F08-singleton-publicador-alertas.pt-br.md) |
+| Factory Method | Criação da declaração (`model/fiscalizacao/resultado_analise.py`) | [ADR-F11](docs/fiscalizacao/ADR-F11-remocao-das-fontes-e-factory-na-declaracao.pt-br.md) |
+
+Todos os models acessam o banco pelo `ModeloBase` ([ADR-F09](docs/fiscalizacao/ADR-F09-acesso-a-dados-unificado.pt-br.md)).
+A relação entre o trabalho e o plano de ensino está em [`docs/status-do-trabalho.md`](docs/status-do-trabalho.md).
+
 ### Executar
 
 ```bash
@@ -186,6 +213,8 @@ Na primeira execução, o programa cria a pasta `data/` e o banco `data/syscar.d
 ```bash
 python3 -m unittest discover -s tests -v
 ```
+
+São 172 testes automatizados. Os testes não usam o Tkinter e criam um banco temporário: o `data/syscar.db` não muda.
 
 ### Como adicionar uma entidade nova
 
