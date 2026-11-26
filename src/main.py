@@ -24,11 +24,13 @@ def main():
         return 1
 
     from controller.fiscalizacao.alerta_controller import AlertaController
+    from controller.propriedade_rural_controller import PropriedadeRuralController
     from controller.proprietario_controller import ProprietarioController
     from database.database import init_db
 
     init_db()
-    if ProprietarioController().banco_desatualizado() or AlertaController().banco_desatualizado():
+    desatualizados = (ProprietarioController(), PropriedadeRuralController(), AlertaController())
+    if any(controller.banco_desatualizado() for controller in desatualizados):
         print(BANCO_ANTIGO)
         return 1
 

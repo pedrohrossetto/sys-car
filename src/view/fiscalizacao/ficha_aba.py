@@ -61,8 +61,8 @@ class FichaAba:
             resumo, "Propriedade", ("Nome", "Cadastro público"), 0)
         self.campos_proprietario = self._caixa_de_campos(
             resumo, "Proprietário", ("Nome", "Tipo", "Documento"), 1)
-        self.campos_localizacao = self._caixa_de_campos(
-            resumo, "Localização", ("Latitude", "Longitude", "Altitude", "Polígono"), 2)
+        self.campos_area = self._caixa_de_campos(
+            resumo, "Área", ("Centro (lat, lon)", "Área", "Vértices"), 2)
         self.campos_embargo = self._caixa_de_campos(
             resumo, "Embargo ativo", ("Unidade", "Data", "Motivo"), 3)
 
@@ -116,13 +116,11 @@ class FichaAba:
             "Documento": formatar_documento(dono) if dono else None,
         })
 
-        loc = ficha.localizacao
-        vertices = len(loc.poligono_geometria.split(";")) if loc and loc.poligono_geometria else 0
-        self._definir(self.campos_localizacao, {
-            "Latitude": loc.latitude if loc else "não cadastrada",
-            "Longitude": loc.longitude if loc else None,
-            "Altitude": loc.altitude if loc else None,
-            "Polígono": f"{vertices} vértices" if vertices else None,
+        centro = p.centroide
+        self._definir(self.campos_area, {
+            "Centro (lat, lon)": f"{centro[0]:.5f}, {centro[1]:.5f}" if centro else "sem área",
+            "Área": f"{p.area_ha:.2f} ha" if p.poligono else None,
+            "Vértices": len(p.area) if p.poligono else None,
         })
 
         embargo = ficha.embargo_ativo
@@ -151,7 +149,7 @@ class FichaAba:
 
     def _limpar(self):
         for campos in (self.campos_propriedade, self.campos_proprietario,
-                       self.campos_localizacao, self.campos_embargo):
+                       self.campos_area, self.campos_embargo):
             for variavel in campos.values():
                 variavel.set("-")
         self.situacao.config(text="-", foreground="")

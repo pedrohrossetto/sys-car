@@ -19,7 +19,7 @@ from model.fiscalizacao.embargo import Embargo
 from model.fiscalizacao.notificacao import Notificacao
 from model.fiscalizacao.registro_desmatamento import RegistroDesmatamento
 from model.fiscalizacao.unidade_competente import UnidadeCompetente
-from model.localizacao import Localizacao
+from model.propriedade_rural import PropriedadeRural
 from test_fiscalizacao_apoio import BancoTemporario
 
 PASTA_MODELS = Path(__file__).resolve().parent.parent / "src" / "model" / "fiscalizacao"
@@ -105,13 +105,9 @@ class TestComportamentoMantido(BancoTemporario):
 
     def test_cadastro_continua_listando_em_ordem_crescente(self):
         # A ordem padrão do ModeloBase não mudou para os models do Cadastro.
-        primeira = Localizacao(self.propriedade_id, 0, 0)
-        primeira.salvar()
-        segunda = Localizacao(self.criar_propriedade("Outra"), 1, 1)
-        segunda.salvar()
-        ids = [l.id for l in Localizacao.listar_todos()]
-        self.assertEqual(ids, [primeira.id, segunda.id])
-
+        segunda = self.criar_propriedade("Outra")
+        ids = [p.id for p in PropriedadeRural.listar_todos()]
+        self.assertEqual(ids, [self.propriedade_id, segunda])
 
 if __name__ == "__main__":
     unittest.main()
