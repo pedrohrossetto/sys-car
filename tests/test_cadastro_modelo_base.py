@@ -52,8 +52,12 @@ class TestModeloBase(BancoTemporario):
     def test_check_do_banco_impede_pf_sem_cpf(self):
         import sqlite3
 
-        with self.assertRaises(sqlite3.IntegrityError):
+        from model.erros import ErroDeBanco
+
+        # O CHECK do banco continua valendo. O erro sai do model como ErroDeBanco (ADR-003).
+        with self.assertRaises(ErroDeBanco) as contexto:
             Proprietario("Ana", "PF", cnpj="11222333000181").salvar()
+        self.assertIsInstance(contexto.exception.__cause__, sqlite3.IntegrityError)
 
 
 if __name__ == "__main__":
