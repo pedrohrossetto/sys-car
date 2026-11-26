@@ -149,6 +149,7 @@ Este diagrama mostra onde está cada padrão de projeto:
 - `ResultadoAnalise` aplica o Factory Method.
 - `EstadoAlerta` aplica o State.
 - `ObservadorAlerta` e `PublicadorAlertas` aplicam o Observer.
+- `TransicaoInvalida` e `ErroDeBanco` são as exceções próprias do sistema (ver [ADR-003](../decisoes/ADR-003-estrategia-de-excecoes.pt-br.md)).
 - `PublicadorAlertas` também aplica o Singleton: o sistema usa uma única instância, obtida por `instancia()`. O construtor continua público para os testes injetarem publicadores isolados.
 
 ```mermaid
@@ -193,6 +194,16 @@ classDiagram
     class Confirmado
     class Resolvido
     class Cancelado
+    class ValueError {
+        <<Python>>
+    }
+    class Exception {
+        <<Python>>
+    }
+    class TransicaoInvalida
+    class ErroDeBanco {
+        +de(erro_sqlite)$
+    }
     class ObservadorAlerta {
         <<abstract>>
         +atualizar(registro, evento)*
@@ -295,6 +306,10 @@ classDiagram
     EstadoAlerta <|-- Confirmado
     EstadoAlerta <|-- Resolvido
     EstadoAlerta <|-- Cancelado
+    ValueError <|-- TransicaoInvalida
+    Exception <|-- ErroDeBanco
+    EstadoAlerta ..> TransicaoInvalida : lança
+    ModeloBase ..> ErroDeBanco : lança
     RegistroDesmatamento --> EstadoAlerta : estado
     ObservadorAlerta <|-- NotificadorUnidades
     PublicadorAlertas o-- ObservadorAlerta

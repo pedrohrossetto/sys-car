@@ -191,6 +191,7 @@ sys-car/
 | Factory Method | Criação da declaração (`model/fiscalizacao/resultado_analise.py`) | [ADR-F11](docs/fiscalizacao/ADR-F11-remocao-das-fontes-e-factory-na-declaracao.pt-br.md) |
 
 Todos os models acessam o banco pelo `ModeloBase` ([ADR-F09](docs/fiscalizacao/ADR-F09-acesso-a-dados-unificado.pt-br.md)).
+O tratamento de exceções segue o MVC: o model lança, o controller captura e a view mostra ([ADR-003](docs/decisoes/ADR-003-estrategia-de-excecoes.pt-br.md)).
 A relação entre o trabalho e o plano de ensino está em [`docs/status-do-trabalho.md`](docs/status-do-trabalho.md).
 
 ### Executar
@@ -214,7 +215,7 @@ Na primeira execução, o programa cria a pasta `data/` e o banco `data/syscar.d
 python3 -m unittest discover -s tests -v
 ```
 
-São 172 testes automatizados. Os testes não usam o Tkinter e criam um banco temporário: o `data/syscar.db` não muda.
+São 186 testes automatizados. Os testes não usam o Tkinter e criam um banco temporário: o `data/syscar.db` não muda.
 
 ### Como adicionar uma entidade nova
 
