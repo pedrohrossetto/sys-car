@@ -6,8 +6,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from controller.fiscalizacao.alerta_controller import AlertaController
-from controller.fiscalizacao.fonte_controller import FonteController
+from controller.fiscalizacao.conformidade_controller import ConformidadeController
 from controller.fiscalizacao.unidade_controller import UnidadeController
+from database.database import get_connection
 from model.fiscalizacao.observador import ObservadorAlerta, PublicadorAlertas
 from test_fiscalizacao_apoio import BancoTemporario
 
@@ -52,60 +53,76 @@ class TestPublicadorSingleton(unittest.TestCase):
 class TestAlertas(BancoTemporario):
     def setUp(self):
         super().setUp()
-        self.fontes = FonteController()
         self.alertas = AlertaController()
         self.unidades = UnidadeController()
-        self.satelite, _ = self.fontes.criar_satelite("Landsat 9", "NASA")
-        self.usuario, _ = self.fontes.criar_usuario("Joana", "529.982.247-25", "joana@ex.com")
 
-    def novo_por_satelite(self, **extra):
-        dados = dict(satelite_id=self.satelite.id, propriedade_id=self.propriedade_id,
-                     descricao="Corte raso", latitude="-28,2", longitude="-52.4")
+    def novo(self, **extra):
+        dados = dict(propriedade_id=self.propriedade_id, descricao="Corte raso",
+                     latitude="-28,2", longitude="-52.4")
         dados.update(extra)
-        return self.alertas.registrar_por_satelite(**dados)
+        return self.alertas.criar(**dados)
 
-    def test_satelite_cria_alerta_pendente_sem_evidencia(self):
-        registro, erro = self.novo_por_satelite()
+    def test_criar_alerta_pendente(self):
+        registro, erro = self.novo(data="2026-11-01")
         self.assertIsNone(erro)
         salvo = self.alertas.buscar_por_id(registro.id)
-        self.assertEqual((salvo.status, salvo.latitude, salvo.satelite_id, salvo.usuario_id),
-                         ("PENDENTE", -28.2, self.satelite.id, None))
-
-    def test_usuario_sem_evidencia_e_rejeitado(self):
-        registro, erro = self.alertas.registrar_por_usuario(
-            self.usuario.id, self.propriedade_id, "Queimada", 0, 0, evidencias=[])
-        self.assertIsNone(registro)
-        self.assertEqual(erro, "Denúncia de usuário exige pelo menos uma evidência.")
-        self.assertEqual(self.contar("registros_desmatamento"), 0)
-
-    def test_usuario_com_evidencia_grava_alerta_e_evidencias(self):
-        registro, erro = self.alertas.registrar_por_usuario(
-            self.usuario.id, self.propriedade_id, "Queimada", 0, 0,
-            evidencias=[("Foto", "http://x/1.jpg"), ("Vídeo", "http://x/2.mp4")])
-        self.assertIsNone(erro)
-        self.assertEqual(registro.usuario_id, self.usuario.id)
-        self.assertEqual([e.tipo for e in self.alertas.evidencias_de(registro.id)], ["Foto", "Vídeo"])
-
-    def test_evidencia_com_link_vazio_e_rejeitada(self):
-        _, erro = self.alertas.registrar_por_usuario(
-            self.usuario.id, self.propriedade_id, "Queimada", 0, 0, evidencias=[("Foto", "  ")])
-        self.assertEqual(erro, "Preencha o campo Link da evidência.")
-        self.assertEqual(self.contar("registros_desmatamento"), 0)
+        self.assertEqual((salvo.status, salvo.latitude, salvo.longitude, salvo.data),
+                         ("PENDENTE", -28.2, -52.4, "2026-11-01"))
 
     def test_validacoes_de_entrada(self):
-        self.assertEqual(self.novo_por_satelite(latitude="91")[1], "Latitude deve estar entre -90 e 90.")
-        self.assertEqual(self.novo_por_satelite(longitude="abc")[1], "Longitude deve ser um número.")
-        self.assertEqual(self.novo_por_satelite(descricao="  ")[1], "Preencha o campo Descrição.")
-        self.assertEqual(self.novo_por_satelite(propriedade_id=999)[1], "Propriedade não encontrada.")
-        self.assertEqual(self.novo_por_satelite(propriedade_id=None)[1], "Propriedade não encontrada.")
-        self.assertEqual(self.novo_por_satelite(data="31/12/2026")[1], "Data deve estar no formato AAAA-MM-DD.")
-        self.assertEqual(self.novo_por_satelite(satelite_id=None)[1], "Satélite não encontrado.")
+        self.assertEqual(self.novo(latitude="91")[1], "Latitude deve estar entre -90 e 90.")
+        self.assertEqual(self.novo(longitude="abc")[1], "Longitude deve ser um número.")
+        self.assertEqual(self.novo(descricao="  ")[1], "Preencha o campo Descrição.")
+        self.assertEqual(self.novo(propriedade_id=999)[1], "Propriedade não encontrada.")
+        self.assertEqual(self.novo(propriedade_id=None)[1], "Propriedade não encontrada.")
+        self.assertEqual(self.novo(data="31/12/2026")[1], "Data deve estar no formato AAAA-MM-DD.")
         self.assertEqual(self.contar("registros_desmatamento"), 0)
+
+    def test_atualizar_muda_texto_data_e_coordenadas(self):
+        registro, _ = self.novo()
+        _, erro = self.alertas.atualizar(registro.id, "Corte seletivo", "-29", "-53,5", "2026-10-30")
+        self.assertIsNone(erro)
+        salvo = self.alertas.buscar_por_id(registro.id)
+        self.assertEqual((salvo.descricao, salvo.latitude, salvo.longitude, salvo.data),
+                         ("Corte seletivo", -29.0, -53.5, "2026-10-30"))
+
+    def test_atualizar_nao_muda_status_nem_propriedade(self):
+        registro, _ = self.novo()
+        self.alertas.mudar_status(registro.id, "CONFIRMADO")
+        self.alertas.atualizar(registro.id, "Outra", 0, 0)
+        salvo = self.alertas.buscar_por_id(registro.id)
+        self.assertEqual((salvo.status, salvo.propriedade_id), ("CONFIRMADO", self.propriedade_id))
+
+    def test_atualizar_valida_e_nao_grava_com_erro(self):
+        registro, _ = self.novo()
+        self.assertEqual(self.alertas.atualizar(registro.id, "x", "200", 0)[1],
+                         "Latitude deve estar entre -90 e 90.")
+        self.assertEqual(self.alertas.buscar_por_id(registro.id).latitude, -28.2)
+        self.assertEqual(self.alertas.atualizar(999, "x", 0, 0)[1], "Alerta não encontrado.")
+        self.assertEqual(self.alertas.atualizar(None, "x", 0, 0)[1], "Alerta não encontrado.")
+
+    def test_atualizar_nao_gera_notificacao(self):
+        self.unidades.criar("IBAMA")
+        registro, _ = self.novo()
+        self.alertas.atualizar(registro.id, "Outra", 0, 0)
+        self.assertEqual(self.contar("notificacoes"), 1)
+
+    def test_excluir_apaga_em_cascata_notificacoes_e_embargos(self):
+        unidade, _ = self.unidades.criar("IBAMA")
+        registro, _ = self.novo()
+        self.alertas.mudar_status(registro.id, "CONFIRMADO")
+        _, erro = ConformidadeController().embargar(self.propriedade_id, unidade.id, registro.id, "Corte")
+        self.assertIsNone(erro)
+        self.assertEqual(self.alertas.excluir(registro.id), (True, None))
+        self.assertIsNone(self.alertas.buscar_por_id(registro.id))
+        for tabela in ("registros_desmatamento", "notificacoes", "embargos"):
+            self.assertEqual(self.contar(tabela), 0, tabela)
+        self.assertEqual(self.alertas.excluir(registro.id)[1], "Alerta não encontrado.")
 
     def test_observer_notifica_cada_unidade_na_criacao_e_na_mudanca(self):
         self.unidades.criar("IBAMA")
         self.unidades.criar("FEPAM")
-        registro, _ = self.novo_por_satelite()
+        registro, _ = self.novo()
         self.assertEqual(self.contar("notificacoes"), 2)
         self.alertas.mudar_status(registro.id, "CONFIRMADO")
         self.assertEqual(self.contar("notificacoes"), 4)
@@ -116,11 +133,11 @@ class TestAlertas(BancoTemporario):
         self.unidades.criar("FEPAM")
         AlertaController()
         AlertaController()
-        self.novo_por_satelite()
+        self.novo()
         self.assertEqual(self.contar("notificacoes"), 2)
 
     def test_observer_sem_unidades_nao_quebra(self):
-        _, erro = self.novo_por_satelite()
+        _, erro = self.novo()
         self.assertIsNone(erro)
         self.assertEqual(self.contar("notificacoes"), 0)
 
@@ -129,13 +146,13 @@ class TestAlertas(BancoTemporario):
         observador = ObservadorDeTeste()
         publicador.inscrever(observador)
         alertas = AlertaController(publicador)
-        registro, _ = alertas.registrar_por_satelite(self.satelite.id, self.propriedade_id, "x", 0, 0)
+        registro, _ = alertas.criar(self.propriedade_id, "x", 0, 0)
         alertas.mudar_status(registro.id, "CANCELADO")
         self.assertEqual(observador.eventos, [
             (registro.id, "novo alerta"), (registro.id, "status alterado para CANCELADO")])
 
     def test_mudar_status_respeita_o_state(self):
-        registro, _ = self.novo_por_satelite()
+        registro, _ = self.novo()
         self.assertEqual(self.alertas.transicoes_possiveis(registro.id), ["CONFIRMADO", "CANCELADO"])
         self.assertEqual(self.alertas.mudar_status(registro.id, "RESOLVIDO")[1],
                          "Não é possível mudar de PENDENTE para RESOLVIDO.")
@@ -146,22 +163,26 @@ class TestAlertas(BancoTemporario):
         self.assertEqual(self.alertas.mudar_status(999, "CONFIRMADO")[1], "Alerta não encontrado.")
 
     def test_listar_sem_finalizados(self):
-        a, _ = self.novo_por_satelite()
-        b, _ = self.novo_por_satelite()
+        a, _ = self.novo()
+        b, _ = self.novo()
         self.alertas.mudar_status(b.id, "CANCELADO")
         self.assertEqual([r.id for r in self.alertas.listar(incluir_finalizados=False)], [a.id])
         self.assertEqual(len(self.alertas.listar()), 2)
 
-    def test_adicionar_evidencia_a_alerta_existente(self):
-        registro, _ = self.novo_por_satelite()
-        _, erro = self.alertas.adicionar_evidencia(registro.id, "Foto", "http://x/3.jpg")
-        self.assertIsNone(erro)
-        self.assertEqual(len(self.alertas.evidencias_de(registro.id)), 1)
-        self.assertEqual(self.alertas.adicionar_evidencia(999, "Foto", "x")[1], "Alerta não encontrado.")
 
-    def test_descrever_origem(self):
-        registro, _ = self.novo_por_satelite()
-        self.assertEqual(self.alertas.descrever_origem(registro), "Satélite: Landsat 9")
+class TestBancoAntigo(BancoTemporario):
+    def test_tabela_com_colunas_de_fonte_e_detectada(self):
+        self.assertFalse(AlertaController().banco_desatualizado())
+        conn = get_connection()
+        try:
+            conn.execute("PRAGMA foreign_keys = OFF")
+            conn.execute("DROP TABLE registros_desmatamento")
+            conn.execute("CREATE TABLE registros_desmatamento (id INTEGER PRIMARY KEY, "
+                         "descricao TEXT, satelite_id INTEGER, usuario_id INTEGER)")
+            conn.commit()
+        finally:
+            conn.close()
+        self.assertTrue(AlertaController().banco_desatualizado())
 
 
 class TestUnidades(BancoTemporario):
@@ -178,8 +199,7 @@ class TestUnidades(BancoTemporario):
 
     def test_marcar_notificacao_lida(self):
         self.unidades.criar("IBAMA")
-        satelite, _ = FonteController().criar_satelite("Landsat")
-        AlertaController().registrar_por_satelite(satelite.id, self.propriedade_id, "x", 0, 0)
+        AlertaController().criar(self.propriedade_id, "x", 0, 0)
         notificacao = self.unidades.listar_notificacoes()[0]
         self.assertEqual(notificacao.status, "ENVIADA")
         self.unidades.marcar_lida(notificacao.id)

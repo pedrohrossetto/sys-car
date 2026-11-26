@@ -9,21 +9,9 @@ A Fiscalização cuida do desmatamento.
 Ela guarda:
 
 - os **alertas**: avisos de que alguém cortou a mata;
-- as **fontes**: quem viu o desmatamento, um satélite ou uma pessoa;
 - as **unidades**: os órgãos que fiscalizam, por exemplo o IBAMA;
 - os **embargos**: proibições de usar a terra;
 - as **declarações**: papéis que dizem se a terra está em ordem.
-
-## Cadastrar quem vê o desmatamento
-
-1. Clique na aba **Fontes**.
-2. Para um satélite, use o quadro **Satélites**.
-3. Para uma pessoa, use o quadro **Usuários**.
-4. Escreva os dados.
-5. Clique em **Salvar**.
-
-O e-mail precisa ter @.
-Se o e-mail estiver errado, aparece um aviso vermelho.
 
 ## Cadastrar um órgão
 
@@ -34,18 +22,32 @@ Se o e-mail estiver errado, aparece um aviso vermelho.
 ## Registrar um alerta
 
 1. Clique na aba **Alertas**.
-2. Escolha a origem: **Satélite** ou **Usuário**.
-3. Escolha quem viu.
-4. Escolha a propriedade.
-5. Escreva a latitude e a longitude.
-6. Escreva o que aconteceu.
-7. Uma pessoa precisa mandar uma prova.
-8. Para mandar a prova, clique em **Adicionar...**.
-9. Escolha o tipo e escreva o link.
-10. Clique em **Registrar alerta**.
+2. Escolha a propriedade.
+3. Escreva a data. Se ficar vazia, vale a data de hoje.
+4. Escreva a latitude e a longitude.
+5. Escreva o que aconteceu.
+6. Clique em **Salvar**.
 
 Todo alerta novo fica **PENDENTE**.
 Os órgãos recebem um aviso.
+
+## Mudar os dados de um alerta
+
+1. Na lista de alertas, clique duas vezes no alerta.
+2. Os dados aparecem no formulário.
+3. Mude a data, a latitude, a longitude ou o texto.
+4. Clique em **Salvar**.
+
+A propriedade do alerta não muda.
+O estado do alerta não muda aqui.
+
+## Apagar um alerta
+
+1. Na lista de alertas, clique no alerta.
+2. Clique em **Excluir**.
+3. Leia o aviso e confirme.
+
+Atenção: os avisos e os embargos deste alerta também são apagados.
 
 ## Mudar o estado de um alerta
 
@@ -75,6 +77,16 @@ Só é possível embargar com um alerta **CONFIRMADO**.
 1. Clique no embargo na lista.
 2. Clique em **Levantar embargo selecionado**.
 
+O embargo continua na lista, com a situação **LEVANTADO**.
+Um embargo nunca é apagado.
+
+## Mudar o motivo do embargo
+
+1. Clique no embargo na lista.
+2. O motivo aparece no campo **Motivo**.
+3. Escreva o motivo certo.
+4. Clique em **Alterar motivo do selecionado**.
+
 ## Pedir a declaração
 
 1. Escolha a propriedade.
@@ -82,6 +94,9 @@ Só é possível embargar com um alerta **CONFIRMADO**.
 3. A declaração é **EMITIDA** quando está tudo certo.
 4. A declaração é **NEGADA** quando há alerta aberto ou embargo.
 5. O motivo aparece na lista.
+
+Uma declaração não muda e não é apagada.
+Se a situação da terra mudar, peça uma declaração nova.
 
 ## Salvar a declaração
 

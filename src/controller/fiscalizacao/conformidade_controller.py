@@ -2,6 +2,7 @@ from controller.fiscalizacao.propriedades import buscar_propriedade, listar_prop
 from model.fiscalizacao.declaracao import Declaracao
 from model.fiscalizacao.embargo import Embargo
 from model.fiscalizacao.registro_desmatamento import RegistroDesmatamento
+from model.fiscalizacao.resultado_analise import analisar
 from model.fiscalizacao.regras import data_iso, texto_obrigatorio
 from model.fiscalizacao.status import StatusAlerta
 from model.fiscalizacao.unidade_competente import UnidadeCompetente
@@ -46,6 +47,21 @@ class ConformidadeController:
         embargo.salvar()
         return embargo, None
 
+    def alterar_motivo(self, embargo_id, motivo):
+        """Único campo editável do embargo (ADR-F13). Vale para embargo ativo ou levantado."""
+        embargo = Embargo.buscar_por_id(embargo_id) if embargo_id is not None else None
+        if not embargo:
+            return None, "Embargo não encontrado."
+        try:
+            embargo.motivo = texto_obrigatorio(motivo, "Motivo")
+        except ValueError as erro:
+            return None, str(erro)
+        embargo.salvar()
+        return embargo, None
+
+    def buscar_embargo(self, embargo_id):
+        return Embargo.buscar_por_id(embargo_id)
+
     def listar_embargos(self):
         return Embargo.listar_todos()
 
@@ -63,12 +79,8 @@ class ConformidadeController:
         embargo = Embargo.buscar_ativo(propriedade.id)
         if embargo:
             impedimentos.append(f"embargo {embargo.id} ativo")
-        if impedimentos:
-            declaracao = Declaracao(
-                propriedade.id, data_iso(), "NEGADA", "Pendências: " + ", ".join(impedimentos) + "."
-            )
-        else:
-            declaracao = Declaracao(propriedade.id, data_iso(), "EMITIDA")
+        # Factory Method (ADR-F11): o resultado da análise cria a declaração certa.
+        declaracao = analisar(impedimentos).criar_declaracao(propriedade.id, data_iso())
         declaracao.salvar()
         return declaracao, None
 

@@ -72,7 +72,7 @@ class FichaAba:
 
         caixa_alertas = ttk.LabelFrame(tabelas, text="Alertas", padding=6)
         quadro, self.tabela_alertas = criar_tabela(
-            caixa_alertas, ("ID", "Data", "Status", "Origem", "Descrição"), altura=5)
+            caixa_alertas, ("ID", "Data", "Status", "Descrição"), altura=5)
         self.tabela_alertas.column("Descrição", width=260, anchor="w")
         quadro.pack(fill="both", expand=True)
         tabelas.add(caixa_alertas, weight=1)
@@ -136,7 +136,7 @@ class FichaAba:
         self.situacao.config(
             text=ficha.situacao, foreground=CORES_SITUACAO.get(ficha.situacao, COR_REGULAR))
         preencher_tabela(self.tabela_alertas, [
-            (a.id, (a.data, a.status, self.controller.descrever_origem(a), a.descricao), a.status)
+            (a.id, (a.data, a.status, a.descricao), a.status)
             for a in ficha.alertas
         ])
         preencher_tabela(self.tabela_declaracoes, [

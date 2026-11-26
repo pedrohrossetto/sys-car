@@ -7,9 +7,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from controller.fiscalizacao.alerta_controller import AlertaController
 from controller.fiscalizacao.conformidade_controller import ConformidadeController
-from controller.fiscalizacao.fonte_controller import FonteController
 from controller.fiscalizacao.unidade_controller import UnidadeController
 from database import database
+from model.fiscalizacao.declaracao import Declaracao
+from model.fiscalizacao.resultado_analise import (
+    ComPendencias, ResultadoAnalise, SemPendencias, analisar,
+)
 from test_fiscalizacao_apoio import BancoTemporario
 
 
@@ -19,11 +22,9 @@ class TestConformidade(BancoTemporario):
         self.alertas = AlertaController()
         self.conformidade = ConformidadeController()
         self.unidade, _ = UnidadeController().criar("IBAMA", "Federal", "ibama@ex.gov")
-        self.satelite, _ = FonteController().criar_satelite("Sentinel-2")
 
     def novo_alerta(self, propriedade_id=None):
-        registro, _ = self.alertas.registrar_por_satelite(
-            self.satelite.id, propriedade_id or self.propriedade_id, "Corte", 0, 0)
+        registro, _ = self.alertas.criar(propriedade_id or self.propriedade_id, "Corte", 0, 0)
         return registro
 
     def embargar(self, registro, propriedade_id=None):
@@ -106,6 +107,22 @@ class TestConformidade(BancoTemporario):
         self.conformidade.levantar_embargo(embargo.id)
         self.assertIsNone(self.embargar(registro)[1])
 
+    def test_alterar_motivo_do_embargo(self):
+        registro = self.novo_alerta()
+        self.alertas.mudar_status(registro.id, "CONFIRMADO")
+        embargo, _ = self.embargar(registro)
+        _, erro = self.conformidade.alterar_motivo(embargo.id, "  Corte raso em APP  ")
+        self.assertIsNone(erro)
+        salvo = self.conformidade.buscar_embargo(embargo.id)
+        self.assertEqual((salvo.motivo, salvo.ativo, salvo.registro_id), ("Corte raso em APP", 1, registro.id))
+        self.assertEqual(self.conformidade.alterar_motivo(embargo.id, " ")[1], "Preencha o campo Motivo.")
+        self.assertEqual(self.conformidade.buscar_embargo(embargo.id).motivo, "Corte raso em APP")
+        self.conformidade.levantar_embargo(embargo.id)
+        self.assertIsNone(self.conformidade.alterar_motivo(embargo.id, "Corrigido")[1])
+        self.assertEqual(self.conformidade.buscar_embargo(embargo.id).ativo, 0)
+        self.assertEqual(self.conformidade.alterar_motivo(999, "x")[1], "Embargo não encontrado.")
+        self.assertEqual(self.conformidade.alterar_motivo(None, "x")[1], "Embargo não encontrado.")
+
     def test_registros_confirmados_da_propriedade(self):
         a = self.novo_alerta()
         self.novo_alerta()
@@ -125,20 +142,48 @@ class TestConformidade(BancoTemporario):
         self.assertEqual(self.contar("declaracoes"), 0)
 
 
+class TestFactoryMethodDaDeclaracao(unittest.TestCase):
+    """ADR-F11: o resultado da análise cria a declaração (sem banco)."""
+
+    def test_analisar_escolhe_o_resultado_concreto(self):
+        self.assertIsInstance(analisar([]), SemPendencias)
+        self.assertIsInstance(analisar(["alerta 1 PENDENTE"]), ComPendencias)
+        self.assertTrue(issubclass(SemPendencias, ResultadoAnalise))
+        self.assertTrue(issubclass(ComPendencias, ResultadoAnalise))
+
+    def test_sem_pendencias_cria_declaracao_emitida(self):
+        declaracao = SemPendencias().criar_declaracao(5, "2026-11-25")
+        self.assertIsInstance(declaracao, Declaracao)
+        self.assertEqual((declaracao.propriedade_id, declaracao.data, declaracao.resultado,
+                          declaracao.motivo, declaracao.id), (5, "2026-11-25", "EMITIDA", None, None))
+
+    def test_com_pendencias_cria_declaracao_negada_com_motivo(self):
+        declaracao = ComPendencias(["alerta 1 PENDENTE", "embargo 2 ativo"]).criar_declaracao(5, "2026-11-25")
+        self.assertEqual(declaracao.resultado, "NEGADA")
+        self.assertEqual(declaracao.motivo, "Pendências: alerta 1 PENDENTE, embargo 2 ativo.")
+
+    def test_com_pendencias_exige_impedimento(self):
+        with self.assertRaises(ValueError):
+            ComPendencias([])
+
+    def test_resultado_abstrato_nao_pode_ser_instanciado(self):
+        with self.assertRaises(TypeError):
+            ResultadoAnalise()
+
+
 class TestExclusoesECascade(BancoTemporario):
     def test_todas_as_tabelas_da_fiscalizacao_existem(self):
         tabelas = {
-            "satelites", "usuarios", "registros_desmatamento", "evidencias",
-            "unidades_competentes", "notificacoes", "embargos", "declaracoes",
+            "registros_desmatamento", "unidades_competentes", "notificacoes", "embargos",
+            "declaracoes",
         }
         self.assertTrue(tabelas <= self.tabelas())
 
     def test_unidade_com_embargo_nao_pode_ser_excluida(self):
         unidades = UnidadeController()
         unidade, _ = unidades.criar("IBAMA")
-        satelite, _ = FonteController().criar_satelite("Landsat")
         alertas = AlertaController()
-        registro, _ = alertas.registrar_por_satelite(satelite.id, self.propriedade_id, "x", 0, 0)
+        registro, _ = alertas.criar(self.propriedade_id, "x", 0, 0)
         alertas.mudar_status(registro.id, "CONFIRMADO")
         ConformidadeController().embargar(self.propriedade_id, unidade.id, registro.id, "m")
         self.assertEqual(unidades.excluir(unidade.id)[1],
@@ -147,13 +192,10 @@ class TestExclusoesECascade(BancoTemporario):
 
     def test_apagar_propriedade_apaga_tudo_da_fiscalizacao(self):
         unidade, _ = UnidadeController().criar("IBAMA")
-        fontes = FonteController()
-        satelite, _ = fontes.criar_satelite("Landsat")
-        usuario, _ = fontes.criar_usuario("Joana", "52998224725", "a@b.com")
         alertas = AlertaController()
         conformidade = ConformidadeController()
-        registro, _ = alertas.registrar_por_satelite(satelite.id, self.propriedade_id, "x", 0, 0)
-        alertas.registrar_por_usuario(usuario.id, self.propriedade_id, "y", 0, 0, [("Foto", "l")])
+        registro, _ = alertas.criar(self.propriedade_id, "x", 0, 0)
+        alertas.criar(self.propriedade_id, "y", 0, 0)
         alertas.mudar_status(registro.id, "CONFIRMADO")
         conformidade.embargar(self.propriedade_id, unidade.id, registro.id, "m")
         conformidade.solicitar_declaracao(self.propriedade_id)
@@ -163,10 +205,9 @@ class TestExclusoesECascade(BancoTemporario):
             conn.commit()
         finally:
             conn.close()
-        for tabela in ("registros_desmatamento", "evidencias", "notificacoes", "embargos", "declaracoes"):
+        for tabela in ("registros_desmatamento", "notificacoes", "embargos", "declaracoes"):
             with self.subTest(tabela=tabela):
                 self.assertEqual(self.contar(tabela), 0)
-        self.assertEqual((self.contar("satelites"), self.contar("usuarios")), (1, 1))
 
 
 if __name__ == "__main__":

@@ -36,26 +36,15 @@
 classDiagram
 direction TB
 
-    class SATELITE {
-        -INT id
-        -STRING nome
-        -STRING entidade_responsavel
-        +detectarDesmatamento()
-    }
-
-    class USUARIO {
-        -INT id
-        -STRING nome
-        -STRING cpf
-        -STRING email
-        +reportarDesmatamento(evidencia)
-    }
-
     class REGISTRO_DESMATAMENTO {
         -INT id
         -STRING descricao
         -DATE data
         -STATUS_ALERTA status
+        +criar()
+        +ler()
+        +atualizar()
+        +excluir()
         +enviarNotificacao(detalhes)
         +atualizarStatus(status)
     }
@@ -65,13 +54,6 @@ direction TB
         -FLOAT longitude
         -FLOAT altitude
         -GEOMETRY poligono_geometria
-    }
-
-    class EVIDENCIA {
-        -INT id
-        -STRING tipo
-        -STRING link
-        -DATE data
     }
 
     class NOTIFICACAO {
@@ -115,10 +97,7 @@ direction TB
     }
 
     %% Relacionamentos
-    SATELITE "1" --> "0..*" REGISTRO_DESMATAMENTO : registra
-    USUARIO "1" --> "0..*" REGISTRO_DESMATAMENTO : registra
     REGISTRO_DESMATAMENTO "1" *-- "1" LOCALIZACAO : possui
-    REGISTRO_DESMATAMENTO "1" *-- "0..*" EVIDENCIA : contem
     REGISTRO_DESMATAMENTO "1" --> "0..*" NOTIFICACAO : gera
     REGISTRO_DESMATAMENTO ..> STATUS_ALERTA : utiliza
 
