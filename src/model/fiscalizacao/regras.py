@@ -1,5 +1,4 @@
 """Regras de validação usadas pelos controllers da fiscalização."""
-import re
 from datetime import date
 
 
@@ -8,20 +7,6 @@ def texto_obrigatorio(valor, rotulo):
     if not texto:
         raise ValueError(f"Preencha o campo {rotulo}.")
     return texto
-
-
-def normalizar_cpf(texto):
-    """Remove pontos, hífens e espaços do CPF."""
-    return re.sub(r"\D", "", texto or "")
-
-
-def cpf_formato_valido(cpf):
-    """Confere só o formato: 11 dígitos. O dígito verificador não é conferido (ADR-F05)."""
-    return len(cpf) == 11 and cpf.isdigit()
-
-
-def email_valido(email):
-    return re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", (email or "").strip()) is not None
 
 
 def converter_coordenada(valor, rotulo, limite):

@@ -11,6 +11,7 @@ class ModeloBase:
       - _valores() e _de_linha(): ganchos de conversão objeto <-> linha.
     As buscas específicas usam os auxiliares _buscar_um(), _buscar_varios()
     e _existe(). _buscar_varios() aceita a ordem da listagem (padrão: id).
+    colunas_no_banco() ajuda a detectar um banco de versão antiga.
     O construtor da subclasse precisa aceitar as COLUNAS e 'id' como
     argumentos nomeados.
     """
@@ -64,6 +65,15 @@ class ModeloBase:
     @classmethod
     def listar_todos(cls):
         return cls._buscar_varios("1 = 1", ())
+
+    @classmethod
+    def colunas_no_banco(cls):
+        """Nomes das colunas que a tabela tem no banco (vazio se ela não existe)."""
+        conn = get_connection()
+        try:
+            return [linha[1] for linha in conn.execute(f"PRAGMA table_info({cls.TABELA})")]
+        finally:
+            conn.close()
 
     @classmethod
     def _select(cls):

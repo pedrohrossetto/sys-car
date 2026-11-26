@@ -12,25 +12,20 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from controller.fiscalizacao.alerta_controller import AlertaController
 from controller.fiscalizacao.conformidade_controller import ConformidadeController
-from controller.fiscalizacao.fonte_controller import FonteController
 from controller.fiscalizacao.unidade_controller import UnidadeController
 from model.base import ModeloBase
 from model.fiscalizacao.declaracao import Declaracao
 from model.fiscalizacao.embargo import Embargo
-from model.fiscalizacao.evidencia import Evidencia
 from model.fiscalizacao.notificacao import Notificacao
 from model.fiscalizacao.registro_desmatamento import RegistroDesmatamento
-from model.fiscalizacao.satelite import Satelite
 from model.fiscalizacao.unidade_competente import UnidadeCompetente
-from model.fiscalizacao.usuario import Usuario
 from model.localizacao import Localizacao
 from test_fiscalizacao_apoio import BancoTemporario
 
 PASTA_MODELS = Path(__file__).resolve().parent.parent / "src" / "model" / "fiscalizacao"
 
 MODELS_PERSISTIDOS = (
-    Satelite, Usuario, UnidadeCompetente, RegistroDesmatamento,
-    Evidencia, Notificacao, Embargo, Declaracao,
+    UnidadeCompetente, RegistroDesmatamento, Notificacao, Embargo, Declaracao,
 )
 
 
@@ -58,13 +53,11 @@ class TestComportamentoMantido(BancoTemporario):
     def setUp(self):
         super().setUp()
         self.unidade, _ = UnidadeController().criar("IBAMA", "Federal", "ibama@ex.gov")
-        self.satelite, _ = FonteController().criar_satelite("Sentinel-2")
         self.alertas = AlertaController()
         self.conformidade = ConformidadeController()
 
     def novo_alerta(self):
-        registro, _ = self.alertas.registrar_por_satelite(
-            self.satelite.id, self.propriedade_id, "Corte", 0, 0)
+        registro, _ = self.alertas.criar(self.propriedade_id, "Corte", 0, 0)
         return registro
 
     def test_declaracoes_listadas_da_mais_nova_para_a_mais_antiga(self):
@@ -99,11 +92,12 @@ class TestComportamentoMantido(BancoTemporario):
         UnidadeController().marcar_lida(notificacao.id)
         self.assertEqual(Notificacao.buscar_por_id(notificacao.id).status, "LIDA")
 
-    def test_existe_da_unidade_e_da_fonte(self):
+    def test_existe_da_unidade(self):
         self.assertFalse(Embargo.existe_da_unidade(self.unidade.id))
-        self.assertFalse(RegistroDesmatamento.existe_da_fonte("satelite_id", self.satelite.id))
-        self.novo_alerta()
-        self.assertTrue(RegistroDesmatamento.existe_da_fonte("satelite_id", self.satelite.id))
+        registro = self.novo_alerta()
+        self.alertas.mudar_status(registro.id, "CONFIRMADO")
+        self.conformidade.embargar(self.propriedade_id, self.unidade.id, registro.id, "Motivo")
+        self.assertTrue(Embargo.existe_da_unidade(self.unidade.id))
 
     def test_status_do_alerta_volta_do_banco_como_texto(self):
         registro = self.novo_alerta()

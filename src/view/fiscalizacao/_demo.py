@@ -12,7 +12,7 @@ def main():
     from tkinter import ttk
 
     from controller.fiscalizacao.instalacao import preparar_banco
-    from view.fiscalizacao import alertas_aba, conformidade_aba, fontes_aba, unidades_aba
+    from view.fiscalizacao import alertas_aba, conformidade_aba, unidades_aba
 
     preparar_banco()
     root = tk.Tk()
@@ -20,7 +20,7 @@ def main():
     root.geometry("1000x680")
     notebook = ttk.Notebook(root)
     notebook.pack(fill="both", expand=True, padx=6, pady=6)
-    for modulo in sorted((fontes_aba, alertas_aba, unidades_aba, conformidade_aba),
+    for modulo in sorted((alertas_aba, unidades_aba, conformidade_aba),
                          key=lambda m: m.ORDEM):
         modulo.registrar_abas(notebook)
     root.mainloop()

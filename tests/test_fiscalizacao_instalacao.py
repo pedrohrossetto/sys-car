@@ -6,10 +6,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from controller.fiscalizacao.instalacao import preparar_banco
-from model.fiscalizacao.regras import (
-    converter_coordenada, cpf_formato_valido, data_iso, email_valido, normalizar_cpf,
-    texto_obrigatorio,
-)
+from model.fiscalizacao.regras import converter_coordenada, data_iso, texto_obrigatorio
 from test_fiscalizacao_apoio import BancoTemporario
 
 
@@ -29,16 +26,6 @@ class TestRegras(unittest.TestCase):
             texto_obrigatorio("   ", "Nome")
         with self.assertRaisesRegex(ValueError, "Preencha o campo Nome."):
             texto_obrigatorio(None, "Nome")
-
-    def test_cpf_por_formato(self):
-        self.assertEqual(normalizar_cpf("012.345.678-90"), "01234567890")
-        self.assertTrue(cpf_formato_valido("01234567890"))
-        self.assertFalse(cpf_formato_valido("123"))
-
-    def test_email(self):
-        self.assertTrue(email_valido(" joana@ex.com "))
-        for invalido in ("joana", "joana@", "@ex.com", "jo ana@ex.com", "", None):
-            self.assertFalse(email_valido(invalido))
 
     def test_coordenada(self):
         self.assertEqual(converter_coordenada("-28,2", "Latitude", 90), -28.2)

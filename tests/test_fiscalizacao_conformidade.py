@@ -7,7 +7,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from controller.fiscalizacao.alerta_controller import AlertaController
 from controller.fiscalizacao.conformidade_controller import ConformidadeController
-from controller.fiscalizacao.fonte_controller import FonteController
 from controller.fiscalizacao.unidade_controller import UnidadeController
 from database import database
 from test_fiscalizacao_apoio import BancoTemporario
@@ -19,11 +18,9 @@ class TestConformidade(BancoTemporario):
         self.alertas = AlertaController()
         self.conformidade = ConformidadeController()
         self.unidade, _ = UnidadeController().criar("IBAMA", "Federal", "ibama@ex.gov")
-        self.satelite, _ = FonteController().criar_satelite("Sentinel-2")
 
     def novo_alerta(self, propriedade_id=None):
-        registro, _ = self.alertas.registrar_por_satelite(
-            self.satelite.id, propriedade_id or self.propriedade_id, "Corte", 0, 0)
+        registro, _ = self.alertas.criar(propriedade_id or self.propriedade_id, "Corte", 0, 0)
         return registro
 
     def embargar(self, registro, propriedade_id=None):
@@ -128,17 +125,16 @@ class TestConformidade(BancoTemporario):
 class TestExclusoesECascade(BancoTemporario):
     def test_todas_as_tabelas_da_fiscalizacao_existem(self):
         tabelas = {
-            "satelites", "usuarios", "registros_desmatamento", "evidencias",
-            "unidades_competentes", "notificacoes", "embargos", "declaracoes",
+            "registros_desmatamento", "unidades_competentes", "notificacoes", "embargos",
+            "declaracoes",
         }
         self.assertTrue(tabelas <= self.tabelas())
 
     def test_unidade_com_embargo_nao_pode_ser_excluida(self):
         unidades = UnidadeController()
         unidade, _ = unidades.criar("IBAMA")
-        satelite, _ = FonteController().criar_satelite("Landsat")
         alertas = AlertaController()
-        registro, _ = alertas.registrar_por_satelite(satelite.id, self.propriedade_id, "x", 0, 0)
+        registro, _ = alertas.criar(self.propriedade_id, "x", 0, 0)
         alertas.mudar_status(registro.id, "CONFIRMADO")
         ConformidadeController().embargar(self.propriedade_id, unidade.id, registro.id, "m")
         self.assertEqual(unidades.excluir(unidade.id)[1],
@@ -147,13 +143,10 @@ class TestExclusoesECascade(BancoTemporario):
 
     def test_apagar_propriedade_apaga_tudo_da_fiscalizacao(self):
         unidade, _ = UnidadeController().criar("IBAMA")
-        fontes = FonteController()
-        satelite, _ = fontes.criar_satelite("Landsat")
-        usuario, _ = fontes.criar_usuario("Joana", "52998224725", "a@b.com")
         alertas = AlertaController()
         conformidade = ConformidadeController()
-        registro, _ = alertas.registrar_por_satelite(satelite.id, self.propriedade_id, "x", 0, 0)
-        alertas.registrar_por_usuario(usuario.id, self.propriedade_id, "y", 0, 0, [("Foto", "l")])
+        registro, _ = alertas.criar(self.propriedade_id, "x", 0, 0)
+        alertas.criar(self.propriedade_id, "y", 0, 0)
         alertas.mudar_status(registro.id, "CONFIRMADO")
         conformidade.embargar(self.propriedade_id, unidade.id, registro.id, "m")
         conformidade.solicitar_declaracao(self.propriedade_id)
@@ -163,10 +156,9 @@ class TestExclusoesECascade(BancoTemporario):
             conn.commit()
         finally:
             conn.close()
-        for tabela in ("registros_desmatamento", "evidencias", "notificacoes", "embargos", "declaracoes"):
+        for tabela in ("registros_desmatamento", "notificacoes", "embargos", "declaracoes"):
             with self.subTest(tabela=tabela):
                 self.assertEqual(self.contar(tabela), 0)
-        self.assertEqual((self.contar("satelites"), self.contar("usuarios")), (1, 1))
 
 
 if __name__ == "__main__":

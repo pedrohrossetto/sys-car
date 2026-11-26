@@ -11,7 +11,6 @@ from controller.fiscalizacao.conformidade_controller import ConformidadeControll
 from controller.fiscalizacao.ficha_controller import (
     COM_ALERTAS, EMBARGADA, REGULAR, FichaController,
 )
-from controller.fiscalizacao.fonte_controller import FonteController
 from controller.fiscalizacao.unidade_controller import UnidadeController
 from controller.localizacao_controller import LocalizacaoController
 from controller.propriedade_rural_controller import PropriedadeRuralController
@@ -27,14 +26,12 @@ class TestFichaDaPropriedade(BancoTemporario):
         self.alertas = AlertaController()
         self.conformidade = ConformidadeController()
         self.unidade, _ = UnidadeController().criar("IBAMA", "Federal", "ibama@ex.gov")
-        self.satelite, _ = FonteController().criar_satelite("Sentinel-2")
         # Propriedade completa, criada pelos controllers do Cadastro.
         self.dono, _ = ProprietarioController().criar("Ana", "PF", cpf="529.982.247-25")
         self.prop, _ = PropriedadeRuralController().criar("Sítio Boa Vista", self.dono.id, "RS-123")
 
     def novo_alerta(self, propriedade_id=None):
-        registro, _ = self.alertas.registrar_por_satelite(
-            self.satelite.id, propriedade_id or self.prop.id, "Corte raso", -28.2, -52.4)
+        registro, _ = self.alertas.criar(propriedade_id or self.prop.id, "Corte raso", -28.2, -52.4)
         return registro
 
     def test_propriedade_inexistente(self):
@@ -112,10 +109,6 @@ class TestFichaDaPropriedade(BancoTemporario):
         ficha, _ = self.fichas.montar(self.prop.id)
         self.assertEqual(ficha.situacao, REGULAR)
         self.assertEqual(len(ficha.alertas), 1)
-
-    def test_descrever_origem_do_alerta(self):
-        registro = self.novo_alerta()
-        self.assertEqual(self.fichas.descrever_origem(registro), "Satélite: Sentinel-2")
 
 
 if __name__ == "__main__":

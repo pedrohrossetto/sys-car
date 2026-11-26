@@ -11,33 +11,29 @@ CREATE TABLE IF NOT EXISTS registros_desmatamento (
     latitude REAL NOT NULL CHECK (latitude BETWEEN -90 AND 90),
     longitude REAL NOT NULL CHECK (longitude BETWEEN -180 AND 180),
     propriedade_id INTEGER NOT NULL
-        REFERENCES propriedades_rurais(id) ON DELETE CASCADE,
-    satelite_id INTEGER REFERENCES satelites(id),
-    usuario_id INTEGER REFERENCES usuarios(id),
-    CHECK ((satelite_id IS NULL) <> (usuario_id IS NULL))
+        REFERENCES propriedades_rurais(id) ON DELETE CASCADE
 );
 """
 
 
 class RegistroDesmatamento(ModeloBase):
-    """Alerta de desmatamento. As coordenadas ficam embutidas (ADR-F04)."""
+    """Alerta de desmatamento. As coordenadas ficam embutidas (ADR-F04).
+
+    O CRUD vem do ModeloBase (salvar, buscar_por_id, listar_todos, deletar).
+    O status só muda por mudar_status() (State, ADR-F01); ver ADR-F12.
+    """
 
     TABELA = "registros_desmatamento"
-    COLUNAS = (
-        "descricao", "data", "status", "latitude", "longitude",
-        "propriedade_id", "satelite_id", "usuario_id",
-    )
+    COLUNAS = ("descricao", "data", "status", "latitude", "longitude", "propriedade_id")
 
     def __init__(self, propriedade_id, descricao, data, latitude, longitude,
-                 satelite_id=None, usuario_id=None, status="PENDENTE", id=None):
+                 status="PENDENTE", id=None):
         self.id = id
         self.propriedade_id = propriedade_id
         self.descricao = descricao
         self.data = data
         self.latitude = latitude
         self.longitude = longitude
-        self.satelite_id = satelite_id
-        self.usuario_id = usuario_id
         self.status = StatusAlerta(status).value
 
     @property
@@ -54,8 +50,6 @@ class RegistroDesmatamento(ModeloBase):
         return cls._buscar_varios("propriedade_id = ?", (propriedade_id,))
 
     @classmethod
-    def existe_da_fonte(cls, coluna, fonte_id):
-        """True se algum registro veio do satélite/usuário informado."""
-        if coluna not in ("satelite_id", "usuario_id"):
-            raise ValueError("coluna inválida")
-        return cls._existe(f"{coluna} = ?", (fonte_id,))
+    def schema_desatualizado(cls):
+        """True se o banco tem a tabela da versão antiga (com satelite_id/usuario_id)."""
+        return "satelite_id" in cls.colunas_no_banco()

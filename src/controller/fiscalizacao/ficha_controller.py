@@ -13,9 +13,7 @@ from controller.fiscalizacao.propriedades import (
 from model.fiscalizacao.declaracao import Declaracao
 from model.fiscalizacao.embargo import Embargo
 from model.fiscalizacao.registro_desmatamento import RegistroDesmatamento
-from model.fiscalizacao.satelite import Satelite
 from model.fiscalizacao.unidade_competente import UnidadeCompetente
-from model.fiscalizacao.usuario import Usuario
 
 EMBARGADA = "EMBARGADA"
 COM_ALERTAS = "COM ALERTAS EM ABERTO"
@@ -66,11 +64,3 @@ class FichaController:
             declaracoes=Declaracao.listar_por_propriedade(propriedade.id),
         )
         return ficha, None
-
-    def descrever_origem(self, alerta):
-        """Texto curto com a fonte do alerta: satélite ou usuário denunciante."""
-        if alerta.satelite_id is not None:
-            satelite = Satelite.buscar_por_id(alerta.satelite_id)
-            return f"Satélite: {satelite.nome if satelite else alerta.satelite_id}"
-        usuario = Usuario.buscar_por_id(alerta.usuario_id)
-        return f"Usuário: {usuario.nome if usuario else alerta.usuario_id}"

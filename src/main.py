@@ -23,11 +23,12 @@ def main():
         print(SEM_TKINTER)
         return 1
 
+    from controller.fiscalizacao.alerta_controller import AlertaController
     from controller.proprietario_controller import ProprietarioController
     from database.database import init_db
 
     init_db()
-    if ProprietarioController().banco_desatualizado():
+    if ProprietarioController().banco_desatualizado() or AlertaController().banco_desatualizado():
         print(BANCO_ANTIGO)
         return 1
 
