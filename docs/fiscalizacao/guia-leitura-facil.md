@@ -15,6 +15,8 @@ Ela guarda:
 
 ## Cadastrar um órgão
 
+![Tela da aba Unidades e Notificações](../imagens/aba-unidades-e-notificacoes.png)
+
 1. Clique na aba **Unidades e Notificações**.
 2. Escreva o nome do órgão.
 3. Clique em **Salvar**.
@@ -72,6 +74,8 @@ Os estados são:
 
 ## Embargar uma propriedade
 
+![Tela da aba Embargos e Declarações](../imagens/aba-embargos-e-declaracoes.png)
+
 1. Clique na aba **Embargos e Declarações**.
 2. Escolha a propriedade.
 3. Escolha o alerta confirmado.
@@ -113,3 +117,18 @@ Se a situação da terra mudar, peça uma declaração nova.
 2. Clique em **Salvar selecionada em .txt...**.
 3. Escolha a pasta.
 4. Clique em **Salvar**.
+
+## Ver tudo sobre uma terra
+
+![Tela da aba Ficha da Propriedade](../imagens/aba-ficha.png)
+
+1. Clique na aba **Ficha da Propriedade**.
+2. Escolha a propriedade.
+3. A ficha mostra o dono, a área, os alertas, o embargo e as declarações.
+4. O mapa mostra a área da terra e os alertas.
+
+No alto da ficha aparece a **Situação**:
+
+- **REGULAR**: está tudo certo;
+- **COM ALERTAS EM ABERTO**: há um alerta que a unidade ainda precisa examinar ou resolver;
+- **EMBARGADA**: a terra está embargada.

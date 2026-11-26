@@ -122,6 +122,10 @@ mapa: a área da propriedade é desenhada clique a clique, e o alerta é um cliq
 
 ![Aba Alertas: mapa com as áreas das propriedades e os alertas, lista e formulário do novo alerta](docs/imagens/aba-alertas.png)
 
+![Aba Unidades e Notificações: cadastro das unidades competentes e notificações recebidas](docs/imagens/aba-unidades-e-notificacoes.png)
+
+![Aba Embargos e Declarações: embargo ativo e declarações emitida e negada](docs/imagens/aba-embargos-e-declaracoes.png)
+
 ![Aba Ficha da Propriedade: área, proprietário, embargo, alertas, declarações e o mapa da propriedade](docs/imagens/aba-ficha.png)
 
 ## Documentação
