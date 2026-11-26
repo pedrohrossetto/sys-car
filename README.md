@@ -157,6 +157,7 @@ sys-car/
 ├── tests/                        # testes automatizados (unittest)
 └── src/
     ├── main.py                   # ponto de entrada
+    ├── dados_exemplo.py          # dados de exemplo para a demonstração
     ├── descoberta.py             # descoberta automática de tabelas e abas
     ├── database/
     │   └── database.py           # conexão + init_db() (executa o SCHEMA de cada model)
@@ -207,6 +208,17 @@ O programa precisa do **Tkinter**:
 
 Na primeira execução, o programa cria a pasta `data/` e o banco `data/syscar.db`.
 
+#### Dados de exemplo
+
+Para a demonstração, grave os dados de exemplo num banco vazio. A partir da pasta `src`:
+
+```bash
+python3 dados_exemplo.py
+```
+
+O script grava 3 proprietários, 3 propriedades (uma EMBARGADA, uma COM ALERTAS EM ABERTO e uma REGULAR), 3 unidades, 5 alertas, 1 embargo e 2 declarações.
+Se o banco já tem dados, o script não grava nada. O roteiro da apresentação está em [`docs/apresentacao/roteiro.md`](docs/apresentacao/roteiro.md).
+
 > **Banco de uma versão antiga:** se o programa avisar que o banco é de uma versão antiga, apague o arquivo `data/syscar.db` e rode de novo.
 
 ### Testes
@@ -215,7 +227,7 @@ Na primeira execução, o programa cria a pasta `data/` e o banco `data/syscar.d
 python3 -m unittest discover -s tests -v
 ```
 
-São 186 testes automatizados. Os testes não usam o Tkinter e criam um banco temporário: o `data/syscar.db` não muda.
+São 189 testes automatizados. Os testes não usam o Tkinter e criam um banco temporário: o `data/syscar.db` não muda.
 
 ### Como adicionar uma entidade nova
 
