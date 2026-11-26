@@ -1,3 +1,4 @@
+from controller.erros import devolve_erro
 from model.fiscalizacao.embargo import Embargo
 from model.fiscalizacao.notificacao import Notificacao
 from model.fiscalizacao.regras import texto_obrigatorio
@@ -7,6 +8,7 @@ from model.fiscalizacao.unidade_competente import UnidadeCompetente
 class UnidadeController:
     """Cadastro de unidades competentes e leitura das notificações."""
 
+    @devolve_erro
     def criar(self, nome, tipo_unidade_orgao=None, contato=None):
         try:
             nome = texto_obrigatorio(nome, "Nome")
@@ -18,6 +20,7 @@ class UnidadeController:
         unidade.salvar()
         return unidade, None
 
+    @devolve_erro
     def atualizar(self, id, nome, tipo_unidade_orgao=None, contato=None):
         unidade = UnidadeCompetente.buscar_por_id(id)
         if not unidade:
@@ -31,6 +34,7 @@ class UnidadeController:
         unidade.salvar()
         return unidade, None
 
+    @devolve_erro
     def excluir(self, id):
         unidade = UnidadeCompetente.buscar_por_id(id)
         if not unidade:
@@ -49,6 +53,7 @@ class UnidadeController:
     def listar_notificacoes(self):
         return Notificacao.listar_todas()
 
+    @devolve_erro
     def marcar_lida(self, notificacao_id):
         notificacao = Notificacao.buscar_por_id(notificacao_id)
         if not notificacao:

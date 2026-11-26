@@ -1,3 +1,4 @@
+from controller.erros import devolve_erro
 from controller.fiscalizacao.propriedades import (
     buscar_propriedade, listar_areas, listar_propriedades, propriedade_no_ponto,
 )
@@ -30,6 +31,7 @@ class AlertaController:
         self.publicador = publicador
 
     # ---------------- CRUD ----------------
+    @devolve_erro
     def criar(self, descricao, latitude, longitude, data=None):
         """O ponto define a propriedade (ADR-F14). Fora de toda área: alerta sem propriedade."""
         try:
@@ -45,6 +47,7 @@ class AlertaController:
         self.publicador.notificar(registro, "novo alerta")
         return registro, None
 
+    @devolve_erro
     def atualizar(self, id, descricao, data=None):
         """Altera descrição e data. Ponto, propriedade e status (State) não mudam."""
         registro = RegistroDesmatamento.buscar_por_id(id) if id is not None else None
@@ -59,6 +62,7 @@ class AlertaController:
         registro.salvar()
         return registro, None
 
+    @devolve_erro
     def excluir(self, id):
         """Apaga o alerta. O banco apaga em cascata as notificações e os embargos dele."""
         registro = RegistroDesmatamento.buscar_por_id(id) if id is not None else None
@@ -81,6 +85,7 @@ class AlertaController:
         return {"descricao": texto_obrigatorio(descricao, "Descrição"), "data": data_iso(data)}
 
     # ---------------- exame (State) ----------------
+    @devolve_erro
     def mudar_status(self, registro_id, novo_status):
         registro = RegistroDesmatamento.buscar_por_id(registro_id)
         if not registro:

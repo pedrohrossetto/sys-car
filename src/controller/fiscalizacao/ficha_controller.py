@@ -7,6 +7,7 @@ A view recebe uma FichaPropriedade pronta e não acessa nenhum model.
 """
 from dataclasses import dataclass, field
 
+from controller.erros import devolve_erro
 from controller.fiscalizacao.propriedades import (
     buscar_propriedade, buscar_proprietario, listar_areas, listar_propriedades,
 )
@@ -50,6 +51,7 @@ class FichaController:
     def listar_areas(self):
         return listar_areas()
 
+    @devolve_erro
     def montar(self, propriedade_id):
         """Devolve (FichaPropriedade, None) ou (None, "mensagem")."""
         propriedade = buscar_propriedade(propriedade_id)
