@@ -47,6 +47,21 @@ class ConformidadeController:
         embargo.salvar()
         return embargo, None
 
+    def alterar_motivo(self, embargo_id, motivo):
+        """Único campo editável do embargo (ADR-F13). Vale para embargo ativo ou levantado."""
+        embargo = Embargo.buscar_por_id(embargo_id) if embargo_id is not None else None
+        if not embargo:
+            return None, "Embargo não encontrado."
+        try:
+            embargo.motivo = texto_obrigatorio(motivo, "Motivo")
+        except ValueError as erro:
+            return None, str(erro)
+        embargo.salvar()
+        return embargo, None
+
+    def buscar_embargo(self, embargo_id):
+        return Embargo.buscar_por_id(embargo_id)
+
     def listar_embargos(self):
         return Embargo.listar_todos()
 

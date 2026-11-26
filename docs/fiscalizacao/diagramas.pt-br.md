@@ -232,6 +232,7 @@ classDiagram
         +solicitar_declaracao(propriedade_id)
         +embargar(...)
         +levantar_embargo(id)
+        +alterar_motivo(embargo_id, motivo)
     }
     class UnidadeController
     class FichaAba {

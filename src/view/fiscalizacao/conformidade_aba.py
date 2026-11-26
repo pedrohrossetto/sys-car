@@ -57,10 +57,30 @@ class ConformidadeAba:
         ttk.Button(botoes, text="Embargar", command=self._embargar).pack(side="left", padx=2)
         ttk.Button(botoes, text="Levantar embargo selecionado",
                    command=self._levantar).pack(side="left", padx=2)
+        ttk.Button(botoes, text="Alterar motivo do selecionado",
+                   command=self._alterar_motivo).pack(side="left", padx=2)
 
         quadro, self.tabela_embargos = criar_tabela(
             caixa, ("ID", "Propriedade", "Unidade", "Alerta", "Data", "Motivo", "Situação"), altura=5)
         quadro.pack(fill="both", expand=True)
+        # Ao selecionar um embargo, o motivo dele vai para o campo Motivo (para editar).
+        self.tabela_embargos.bind("<<TreeviewSelect>>", lambda e: self._mostrar_motivo())
+
+    def _mostrar_motivo(self):
+        id = id_selecionado(self.tabela_embargos)
+        embargo = self.controller.buscar_embargo(id) if id is not None else None
+        if embargo is not None:
+            self.motivo.set(embargo.motivo)
+
+    def _alterar_motivo(self):
+        id = id_selecionado(self.tabela_embargos)
+        if id is None:
+            messagebox.showwarning("Aviso", "Selecione um embargo na lista.")
+            return
+        _, erro = self.controller.alterar_motivo(id, self.motivo.get())
+        if mostrar_resultado(erro, self.status, f"Motivo do embargo {id} alterado."):
+            self.motivo.set("")
+            self.recarregar()
 
     def _atualizar_alertas(self):
         propriedade_id = self.prop_embargo.id_selecionado()

@@ -77,6 +77,16 @@ Só é possível embargar com um alerta **CONFIRMADO**.
 1. Clique no embargo na lista.
 2. Clique em **Levantar embargo selecionado**.
 
+O embargo continua na lista, com a situação **LEVANTADO**.
+Um embargo nunca é apagado.
+
+## Mudar o motivo do embargo
+
+1. Clique no embargo na lista.
+2. O motivo aparece no campo **Motivo**.
+3. Escreva o motivo certo.
+4. Clique em **Alterar motivo do selecionado**.
+
 ## Pedir a declaração
 
 1. Escolha a propriedade.
@@ -84,6 +94,9 @@ Só é possível embargar com um alerta **CONFIRMADO**.
 3. A declaração é **EMITIDA** quando está tudo certo.
 4. A declaração é **NEGADA** quando há alerta aberto ou embargo.
 5. O motivo aparece na lista.
+
+Uma declaração não muda e não é apagada.
+Se a situação da terra mudar, peça uma declaração nova.
 
 ## Salvar a declaração
 

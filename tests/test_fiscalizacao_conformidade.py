@@ -107,6 +107,22 @@ class TestConformidade(BancoTemporario):
         self.conformidade.levantar_embargo(embargo.id)
         self.assertIsNone(self.embargar(registro)[1])
 
+    def test_alterar_motivo_do_embargo(self):
+        registro = self.novo_alerta()
+        self.alertas.mudar_status(registro.id, "CONFIRMADO")
+        embargo, _ = self.embargar(registro)
+        _, erro = self.conformidade.alterar_motivo(embargo.id, "  Corte raso em APP  ")
+        self.assertIsNone(erro)
+        salvo = self.conformidade.buscar_embargo(embargo.id)
+        self.assertEqual((salvo.motivo, salvo.ativo, salvo.registro_id), ("Corte raso em APP", 1, registro.id))
+        self.assertEqual(self.conformidade.alterar_motivo(embargo.id, " ")[1], "Preencha o campo Motivo.")
+        self.assertEqual(self.conformidade.buscar_embargo(embargo.id).motivo, "Corte raso em APP")
+        self.conformidade.levantar_embargo(embargo.id)
+        self.assertIsNone(self.conformidade.alterar_motivo(embargo.id, "Corrigido")[1])
+        self.assertEqual(self.conformidade.buscar_embargo(embargo.id).ativo, 0)
+        self.assertEqual(self.conformidade.alterar_motivo(999, "x")[1], "Embargo não encontrado.")
+        self.assertEqual(self.conformidade.alterar_motivo(None, "x")[1], "Embargo não encontrado.")
+
     def test_registros_confirmados_da_propriedade(self):
         a = self.novo_alerta()
         self.novo_alerta()

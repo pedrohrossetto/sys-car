@@ -31,6 +31,7 @@ Esta documentação usa estes termos com um significado fixo:
 | [ADR-F10](ADR-F10-ficha-da-propriedade.pt-br.md) | Ficha da propriedade |
 | [ADR-F11](ADR-F11-remocao-das-fontes-e-factory-na-declaracao.pt-br.md) | Remoção das fontes e da evidência; Factory Method na declaração |
 | [ADR-F12](ADR-F12-crud-do-alerta.pt-br.md) | CRUD do alerta de desmatamento |
+| [ADR-F13](ADR-F13-operacoes-de-embargo-declaracao-e-notificacao.pt-br.md) | Operações de embargo, declaração e notificação |
 
 ## Diagramas
 
