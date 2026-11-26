@@ -118,6 +118,8 @@ mapa: a área da propriedade é desenhada clique a clique, e o alerta é um cliq
 
 ![Aba Proprietários com dois cadastros na lista](docs/imagens/aba-proprietarios.png)
 
+![Aba Propriedades: formulário, mapa para desenhar a área e lista com a área em hectares](docs/imagens/aba-propriedades.png)
+
 ![Aba Alertas: mapa com as áreas das propriedades e os alertas, lista e formulário do novo alerta](docs/imagens/aba-alertas.png)
 
 ![Aba Ficha da Propriedade: área, proprietário, embargo, alertas, declarações e o mapa da propriedade](docs/imagens/aba-ficha.png)
