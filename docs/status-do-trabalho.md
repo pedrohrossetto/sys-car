@@ -90,24 +90,24 @@ O sistema tem uma só forma de acessar o banco, como pedem as aulas 09 e 10.
 ### Código
 
 1. ✅ **Unificar o acesso a dados:** os models da Fiscalização usam o `ModeloBase` (aulas 09 e 10, issue #3).
-2. ~~**Singleton:**~~ feito no `PublicadorAlertas` com `PublicadorAlertas.instancia()` (ADR-F08, aula 02).
+2. ✅ **Singleton:** `PublicadorAlertas.instancia()` (ADR-F08, aula 02, issue #4).
 3. ✅ **Completar o CRUD** (aula 08, issue #5): CRUD do alerta (ADR-F12); motivo do embargo editável; operações que não existem de propósito em ADR-F13. Satélite, usuário e evidência saíram do sistema (ADR-F11).
 4. ✅ **Relacionamentos na tela:** a aba "Ficha da Propriedade" mostra dono, área (com mapa), alertas, embargo ativo e declarações (aula 11, issue #6).
-5. **Persistência (opcional):** exportação/importação em CSV ou backup do banco pelo menu Arquivo (aula 12).
-6. **Testes** para tudo o que for criado ou alterado.
+5. **Persistência (opcional):** exportação/importação em CSV ou backup do banco pelo menu Arquivo (aula 12, issue #7). A aula 12 já está coberta pelo SQLite.
+6. ✅ **Testes** para tudo o que foi criado ou alterado: 172 testes automatizados.
 
 ### Documentação
 
-7. ADRs das decisões novas: ~~Singleton~~ (ADR-F08), unificação do acesso a dados e operações que não existem de propósito.
-8. Diagramas de classe atualizados depois da unificação (o Singleton já está no diagrama da Fiscalização).
-9. Revisão da documentação da Fiscalização em português técnico controlado (estilo ASD-STE100).
-10. Capturas de tela das abas da Fiscalização e das telas novas.
-11. README atualizado.
+7. ✅ ADRs das decisões novas: ADR-F08 a ADR-F14, ADR-C05 e ADR-002.
+8. ✅ Diagramas de classe atualizados (issue #12).
+9. ✅ Revisão da documentação da Fiscalização em português técnico controlado (issue #8).
+10. ✅ Capturas de tela de todas as abas (issue #9).
+11. ✅ README atualizado: funcionalidades, padrões de projeto e testes (issue #10).
 
 ### Git e GitHub
 
-12. Uma issue por item desta lista, com responsável.
-13. Um branch e um PR por tarefa, com `Closes #N` na descrição.
+12. ✅ Uma issue por item desta lista, no milestone "Entrega final – 27/11".
+13. ✅ Um branch e um PR por tarefa, com `Closes #N` na descrição.
 
 ### Apresentação
 

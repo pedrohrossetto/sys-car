@@ -29,5 +29,6 @@ Usar o padrão **Template Method** em `src/model/base.py`:
 ## Onde está no código
 
 - `src/model/base.py`: `ModeloBase`.
-- `src/model/proprietario.py`, `src/model/propriedade_rural.py`, `src/model/localizacao.py`: subclasses do Cadastro.
+- `src/model/proprietario.py`, `src/model/propriedade_rural.py`: subclasses do Cadastro.
+  A `Localizacao` foi removida pela [ADR-C05](ADR-C05-area-da-propriedade.pt-br.md).
 - `src/model/fiscalizacao/*.py`: subclasses da Fiscalização (ver ADR-F09).

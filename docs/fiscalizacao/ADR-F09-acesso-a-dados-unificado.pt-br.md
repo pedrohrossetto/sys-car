@@ -41,8 +41,21 @@ O valor padrão de `ordem` é `id`. Por isso, os models do Cadastro continuam a 
 - Todos os models agora têm `deletar()`. Isso prepara a issue #5 (CRUD completo).
 - O `__init__.py` do pacote ainda abre uma conexão. Ele só executa os `SCHEMA` antes da integração (testes e `_demo.py`). Ele não lê nem grava registros.
 
+## Mudanças posteriores
+
+A [ADR-F11](ADR-F11-remocao-das-fontes-e-factory-na-declaracao.pt-br.md) removeu `Satelite`, `Usuario` e `Evidencia`.
+A [ADR-C05](../cadastro/ADR-C05-area-da-propriedade.pt-br.md) removeu a `Localizacao` do Cadastro.
+A decisão desta ADR continua válida: hoje os 7 models do sistema herdam do `ModeloBase`.
+
+| Área | Models |
+|---|---|
+| Cadastro | `Proprietario`, `PropriedadeRural` |
+| Fiscalização | `UnidadeCompetente`, `RegistroDesmatamento`, `Notificacao`, `Embargo`, `Declaracao` |
+
+O auxiliar `_existe()` agora só verifica se uma unidade já aplicou embargo (`Embargo.existe_da_unidade()`).
+
 ## Onde está no código
 
 - `src/model/base.py`: `_buscar_varios()` com `ordem` e `_existe()`
-- `src/model/fiscalizacao/*.py`: os 8 models
+- `src/model/fiscalizacao/*.py`: os models da Fiscalização
 - `tests/test_fiscalizacao_acesso_unificado.py`
