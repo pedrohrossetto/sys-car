@@ -1,3 +1,4 @@
+from controller.erros import devolve_erro
 from model.documento import VALIDADORES
 from model.proprietario import Proprietario
 
@@ -7,6 +8,7 @@ class ProprietarioController:
     # (resultado, erro) -> se deu certo: (objeto/True, None).
     #                       se deu errado: (None, "mensagem de erro").
     # Isso permite à view exibir o erro sem precisar de try/except.
+    @devolve_erro
     def criar(self, nome, tipo, cpf=None, cnpj=None):
         dados, erro = self._validar(nome, tipo, cpf, cnpj)
         if erro:
@@ -21,6 +23,7 @@ class ProprietarioController:
     def listar(self):
         return Proprietario.listar_todos()
 
+    @devolve_erro
     def atualizar(self, id, nome, tipo, cpf=None, cnpj=None):
         proprietario = Proprietario.buscar_por_id(id)
         if not proprietario:
@@ -33,6 +36,7 @@ class ProprietarioController:
         proprietario.salvar()
         return proprietario, None
 
+    @devolve_erro
     def excluir(self, id):
         proprietario = Proprietario.buscar_por_id(id)
         if not proprietario:

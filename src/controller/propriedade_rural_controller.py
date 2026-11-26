@@ -1,3 +1,4 @@
+from controller.erros import devolve_erro
 from model.geometria import Poligono
 from model.propriedade_rural import PropriedadeRural
 from model.proprietario import Proprietario
@@ -6,6 +7,7 @@ from model.proprietario import Proprietario
 class PropriedadeRuralController:
     # Mesmo padrão (resultado, erro) dos outros controllers.
     # poligono: lista de pares (lat, lon) ou texto 'lat,lon;lat,lon;...' (ADR-C05).
+    @devolve_erro
     def criar(self, nome, proprietario_id, cadastro_publico=None, poligono=None):
         dados, erro = self._validar(nome, proprietario_id, cadastro_publico, poligono)
         if erro:
@@ -25,6 +27,7 @@ class PropriedadeRuralController:
         return [(p.id, p.nome, p.area) for p in PropriedadeRural.listar_todos()
                 if p.poligono and p.id != exceto_id]
 
+    @devolve_erro
     def atualizar(self, id, nome, proprietario_id, cadastro_publico=None, poligono=None):
         propriedade = PropriedadeRural.buscar_por_id(id)
         if not propriedade:
@@ -38,6 +41,7 @@ class PropriedadeRuralController:
         propriedade.salvar()
         return propriedade, None
 
+    @devolve_erro
     def excluir(self, id):
         propriedade = PropriedadeRural.buscar_por_id(id)
         if not propriedade:

@@ -55,6 +55,7 @@ Legenda: ✅ feito · 🟡 parcial · ❌ falta · ➖ não existe de propósito
 
 | Aula | Data | Conteúdo | Status | Situação |
 |---|---|---|---|---|
+| Ementa | — | Unidade 1.4: **tratamento de exceções** (sem aula própria no cronograma) | ✅ | O model lança, o controller captura e a view mostra. Erros do banco viram `ErroDeBanco` num ponto só (issue #19, ADR-003) |
 | 02 | 21/08 | Padrões criacionais: Factory e **Singleton** | ✅ | Factory Method na criação da declaração (ADR-F11, substitui a ADR-F03) e Singleton no `PublicadorAlertas` (ADR-F08) |
 | 07 | 09/10 | GUI + SGBD: criar e ler | ✅ | Todas as abas criam e listam registros no SQLite |
 | 08 | 16/10 | GUI + SGBD: atualizar e remover | ✅ | Ver tabela de CRUD abaixo (issue #5, ADR-F12 e ADR-F13) |
@@ -94,11 +95,11 @@ O sistema tem uma só forma de acessar o banco, como pedem as aulas 09 e 10.
 3. ✅ **Completar o CRUD** (aula 08, issue #5): CRUD do alerta (ADR-F12); motivo do embargo editável; operações que não existem de propósito em ADR-F13. Satélite, usuário e evidência saíram do sistema (ADR-F11).
 4. ✅ **Relacionamentos na tela:** a aba "Ficha da Propriedade" mostra dono, área (com mapa), alertas, embargo ativo e declarações (aula 11, issue #6).
 5. **Persistência (opcional):** exportação/importação em CSV ou backup do banco pelo menu Arquivo (aula 12, issue #7). A aula 12 já está coberta pelo SQLite.
-6. ✅ **Testes** para tudo o que foi criado ou alterado: 172 testes automatizados.
+6. ✅ **Testes** para tudo o que foi criado ou alterado: 186 testes automatizados.
 
 ### Documentação
 
-7. ✅ ADRs das decisões novas: ADR-F08 a ADR-F14, ADR-C05 e ADR-002.
+7. ✅ ADRs das decisões novas: ADR-F08 a ADR-F14, ADR-C05, ADR-002 e ADR-003.
 8. ✅ Diagramas de classe atualizados (issue #12).
 9. ✅ Revisão da documentação da Fiscalização em português técnico controlado (issue #8).
 10. ✅ Capturas de tela de todas as abas (issue #9).

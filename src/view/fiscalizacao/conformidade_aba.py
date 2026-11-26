@@ -142,9 +142,15 @@ class ConformidadeAba:
         caminho = filedialog.asksaveasfilename(
             parent=self.frame, title="Salvar declaração", defaultextension=".txt",
             initialfile=f"declaracao-{id}.txt", filetypes=[("Texto", "*.txt")])
-        if caminho:
+        if not caminho:
+            return
+        try:
             Path(caminho).write_text(texto, encoding="utf-8")
-            self.status.config(text=f"Declaração salva em {caminho}.")
+        except OSError as erro:
+            # Pasta sem permissão, disco cheio, caminho inválido etc.
+            mostrar_resultado(f"Não foi possível salvar o arquivo: {erro.strerror or erro}.", self.status)
+            return
+        self.status.config(text=f"Declaração salva em {caminho}.")
 
     # ---------------- comum ----------------
     def recarregar(self):

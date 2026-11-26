@@ -1,3 +1,4 @@
+from controller.erros import devolve_erro
 from controller.fiscalizacao.propriedades import buscar_propriedade, listar_propriedades
 from model.fiscalizacao.declaracao import Declaracao
 from model.fiscalizacao.embargo import Embargo
@@ -18,6 +19,7 @@ class ConformidadeController:
             if r.status == StatusAlerta.CONFIRMADO.value
         ]
 
+    @devolve_erro
     def embargar(self, propriedade_id, unidade_id, registro_id, motivo):
         if not buscar_propriedade(propriedade_id):
             return None, "Propriedade não encontrada."
@@ -37,6 +39,7 @@ class ConformidadeController:
         embargo.salvar()
         return embargo, None
 
+    @devolve_erro
     def levantar_embargo(self, embargo_id):
         embargo = Embargo.buscar_por_id(embargo_id)
         if not embargo:
@@ -47,6 +50,7 @@ class ConformidadeController:
         embargo.salvar()
         return embargo, None
 
+    @devolve_erro
     def alterar_motivo(self, embargo_id, motivo):
         """Único campo editável do embargo (ADR-F13). Vale para embargo ativo ou levantado."""
         embargo = Embargo.buscar_por_id(embargo_id) if embargo_id is not None else None
@@ -66,6 +70,7 @@ class ConformidadeController:
         return Embargo.listar_todos()
 
     # ---------------- declarações ----------------
+    @devolve_erro
     def solicitar_declaracao(self, propriedade_id):
         """Sempre grava o pedido. Devolve (Declaracao, None); o resultado pode ser NEGADA."""
         propriedade = buscar_propriedade(propriedade_id)
@@ -87,6 +92,7 @@ class ConformidadeController:
     def listar_declaracoes(self):
         return Declaracao.listar_todas()
 
+    @devolve_erro
     def texto_declaracao(self, declaracao_id):
         declaracao = Declaracao.buscar_por_id(declaracao_id)
         if not declaracao:

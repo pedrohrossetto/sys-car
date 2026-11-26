@@ -1,4 +1,5 @@
 import tkinter as tk
+import traceback
 from tkinter import messagebox, ttk
 
 import view
@@ -20,6 +21,8 @@ class JanelaPrincipal:
 
     def __init__(self, root):
         self.root = root
+        # Última defesa (ADR-003): um erro não tratado num evento vira uma caixa de erro.
+        root.report_callback_exception = self._erro_inesperado
         root.title("SYS-CAR")
         root.geometry("1180x800")
         root.minsize(960, 640)
@@ -28,6 +31,15 @@ class JanelaPrincipal:
         self.notebook.pack(fill="both", expand=True, padx=6, pady=6)
         for modulo in ordenar_por_ordem(modulos_com(view, "registrar_abas")):
             modulo.registrar_abas(self.notebook)
+
+    def _erro_inesperado(self, tipo, valor, rastro):
+        """Mostra o erro ao usuário e escreve o rastro completo no terminal."""
+        traceback.print_exception(tipo, valor, rastro)
+        messagebox.showerror(
+            "Erro inesperado",
+            f"A ação não foi concluída.\n\n{tipo.__name__}: {valor}",
+            parent=self.root,
+        )
 
     def _criar_menu(self):
         barra = tk.Menu(self.root)

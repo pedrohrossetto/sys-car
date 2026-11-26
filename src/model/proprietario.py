@@ -1,4 +1,3 @@
-from database.database import get_connection
 from model.base import ModeloBase
 
 SCHEMA = """
@@ -46,12 +45,8 @@ class Proprietario(ModeloBase):
             return cls.buscar_por_cpf(documento)
         return cls.buscar_por_cnpj(documento)
 
-    @staticmethod
-    def schema_desatualizado():
+    @classmethod
+    def schema_desatualizado(cls):
         """True se o banco tem a tabela da versão antiga (sem a coluna 'tipo')."""
-        conn = get_connection()
-        try:
-            colunas = [linha[1] for linha in conn.execute("PRAGMA table_info(proprietarios)")]
-        finally:
-            conn.close()
+        colunas = cls.colunas_no_banco()
         return bool(colunas) and "tipo" not in colunas
