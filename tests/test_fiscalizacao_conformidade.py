@@ -9,6 +9,10 @@ from controller.fiscalizacao.alerta_controller import AlertaController
 from controller.fiscalizacao.conformidade_controller import ConformidadeController
 from controller.fiscalizacao.unidade_controller import UnidadeController
 from database import database
+from model.fiscalizacao.declaracao import Declaracao
+from model.fiscalizacao.resultado_analise import (
+    ComPendencias, ResultadoAnalise, SemPendencias, analisar,
+)
 from test_fiscalizacao_apoio import BancoTemporario
 
 
@@ -120,6 +124,35 @@ class TestConformidade(BancoTemporario):
     def test_declaracao_de_propriedade_inexistente(self):
         self.assertEqual(self.conformidade.solicitar_declaracao(999)[1], "Propriedade não encontrada.")
         self.assertEqual(self.contar("declaracoes"), 0)
+
+
+class TestFactoryMethodDaDeclaracao(unittest.TestCase):
+    """ADR-F11: o resultado da análise cria a declaração (sem banco)."""
+
+    def test_analisar_escolhe_o_resultado_concreto(self):
+        self.assertIsInstance(analisar([]), SemPendencias)
+        self.assertIsInstance(analisar(["alerta 1 PENDENTE"]), ComPendencias)
+        self.assertTrue(issubclass(SemPendencias, ResultadoAnalise))
+        self.assertTrue(issubclass(ComPendencias, ResultadoAnalise))
+
+    def test_sem_pendencias_cria_declaracao_emitida(self):
+        declaracao = SemPendencias().criar_declaracao(5, "2026-11-25")
+        self.assertIsInstance(declaracao, Declaracao)
+        self.assertEqual((declaracao.propriedade_id, declaracao.data, declaracao.resultado,
+                          declaracao.motivo, declaracao.id), (5, "2026-11-25", "EMITIDA", None, None))
+
+    def test_com_pendencias_cria_declaracao_negada_com_motivo(self):
+        declaracao = ComPendencias(["alerta 1 PENDENTE", "embargo 2 ativo"]).criar_declaracao(5, "2026-11-25")
+        self.assertEqual(declaracao.resultado, "NEGADA")
+        self.assertEqual(declaracao.motivo, "Pendências: alerta 1 PENDENTE, embargo 2 ativo.")
+
+    def test_com_pendencias_exige_impedimento(self):
+        with self.assertRaises(ValueError):
+            ComPendencias([])
+
+    def test_resultado_abstrato_nao_pode_ser_instanciado(self):
+        with self.assertRaises(TypeError):
+            ResultadoAnalise()
 
 
 class TestExclusoesECascade(BancoTemporario):

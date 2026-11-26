@@ -2,6 +2,7 @@ from controller.fiscalizacao.propriedades import buscar_propriedade, listar_prop
 from model.fiscalizacao.declaracao import Declaracao
 from model.fiscalizacao.embargo import Embargo
 from model.fiscalizacao.registro_desmatamento import RegistroDesmatamento
+from model.fiscalizacao.resultado_analise import analisar
 from model.fiscalizacao.regras import data_iso, texto_obrigatorio
 from model.fiscalizacao.status import StatusAlerta
 from model.fiscalizacao.unidade_competente import UnidadeCompetente
@@ -63,12 +64,8 @@ class ConformidadeController:
         embargo = Embargo.buscar_ativo(propriedade.id)
         if embargo:
             impedimentos.append(f"embargo {embargo.id} ativo")
-        if impedimentos:
-            declaracao = Declaracao(
-                propriedade.id, data_iso(), "NEGADA", "Pendências: " + ", ".join(impedimentos) + "."
-            )
-        else:
-            declaracao = Declaracao(propriedade.id, data_iso(), "EMITIDA")
+        # Factory Method (ADR-F11): o resultado da análise cria a declaração certa.
+        declaracao = analisar(impedimentos).criar_declaracao(propriedade.id, data_iso())
         declaracao.salvar()
         return declaracao, None
 
