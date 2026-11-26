@@ -2,9 +2,8 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 
 from controller.fiscalizacao.alerta_controller import AlertaController
-from controller.fiscalizacao.propriedades import nomes_das_propriedades
 from view.fiscalizacao.componentes import (
-    Seletor, ao_mostrar_aba, corrigir_cores_treeview, criar_tabela, id_selecionado,
+    ao_mostrar_aba, corrigir_cores_treeview, criar_tabela, id_selecionado,
     mostrar_resultado, preencher_tabela,
 )
 
@@ -50,7 +49,7 @@ class AlertasAba:
             variable=self.mostrar_finalizados, command=self.recarregar,
         ).pack(anchor="w")
         quadro, self.tabela = criar_tabela(
-            caixa, ("ID", "Propriedade", "Status", "Data"), altura=10)
+            caixa, ("ID", "Local", "Status", "Data"), altura=10)
         quadro.pack(fill="both", expand=True)
         ttk.Label(caixa, text="Duplo clique: editar. Delete: excluir. Botão direito: mudar o status.",
                   foreground="gray").pack(anchor="w")
@@ -68,14 +67,11 @@ class AlertasAba:
         self.texto_detalhe.pack(anchor="w")
 
     def recarregar(self):
-        nomes = nomes_das_propriedades()
         registros = self.alertas.listar(incluir_finalizados=self.mostrar_finalizados.get())
         preencher_tabela(self.tabela, [
-            (r.id, (nomes.get(r.propriedade_id, "?"), r.status, r.data), r.status)
+            (r.id, (self.alertas.descrever_local(r), r.status, r.data), r.status)
             for r in registros
         ])
-        self.seletor_propriedade.definir_opcoes(
-            [(id, f"{nome} (#{id})") for id, nome in nomes.items()])
         self._mostrar_detalhe()
 
     def _mostrar_detalhe(self):
@@ -115,21 +111,20 @@ class AlertasAba:
         caixa = self.caixa_form
         caixa.columnconfigure(1, weight=1)
 
-        ttk.Label(caixa, text="Propriedade").grid(row=0, column=0, sticky="e", padx=4, pady=2)
-        self.seletor_propriedade = Seletor(caixa)
-        self.seletor_propriedade.grid(row=0, column=1, sticky="ew", padx=4, pady=2)
-
         self.data = tk.StringVar()
         self.latitude = tk.StringVar()
         self.longitude = tk.StringVar()
         campos = (("Data (AAAA-MM-DD)", self.data), ("Latitude", self.latitude),
                   ("Longitude", self.longitude))
+        self.entradas_ponto = []
         for linha, (rotulo, variavel) in enumerate(campos, start=1):
             ttk.Label(caixa, text=rotulo).grid(row=linha, column=0, sticky="e", padx=4, pady=2)
             entrada = ttk.Entry(caixa, textvariable=variavel)
             entrada.grid(row=linha, column=1, sticky="ew", padx=4, pady=2)
             entrada.bind("<Return>", lambda e: self._salvar())
             entrada.bind("<Escape>", lambda e: self._limpar())
+            if variavel is not self.data:
+                self.entradas_ponto.append(entrada)
         ttk.Label(caixa, text="Data vazia = hoje.", foreground="gray").grid(
             row=4, column=1, sticky="w", padx=4)
 
@@ -150,9 +145,9 @@ class AlertasAba:
         if registro is None:
             return
         self.id_carregado = registro.id
-        self.seletor_propriedade.selecionar(registro.propriedade_id)
-        # A propriedade de um alerta não muda (os embargos apontam para ele).
-        self.seletor_propriedade.combo.config(state="disabled")
+        # O ponto (e a propriedade que vem dele) não muda depois de criado (ADR-F14).
+        for entrada in self.entradas_ponto:
+            entrada.config(state="disabled")
         self.data.set(registro.data)
         self.latitude.set(registro.latitude)
         self.longitude.set(registro.longitude)
@@ -169,9 +164,10 @@ class AlertasAba:
             data=self.data.get(),
         )
         if self.id_carregado is None:
-            registro, erro = self.alertas.criar(self.seletor_propriedade.id_selecionado(), **dados)
+            registro, erro = self.alertas.criar(**dados)
         else:
-            registro, erro = self.alertas.atualizar(self.id_carregado, **dados)
+            registro, erro = self.alertas.atualizar(
+                self.id_carregado, dados["descricao"], dados["data"])
         if mostrar_resultado(erro, self.status, f"Alerta {registro.id if registro else ''} salvo."):
             self._limpar(manter_status=True)
             self.recarregar()
@@ -194,7 +190,8 @@ class AlertasAba:
 
     def _limpar(self, manter_status=False):
         self.id_carregado = None
-        self.seletor_propriedade.combo.config(state="readonly")
+        for entrada in self.entradas_ponto:
+            entrada.config(state="normal")
         for variavel in (self.data, self.latitude, self.longitude):
             variavel.set("")
         self.descricao.delete("1.0", "end")

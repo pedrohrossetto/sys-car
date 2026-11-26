@@ -57,7 +57,7 @@ class TestComportamentoMantido(BancoTemporario):
         self.conformidade = ConformidadeController()
 
     def novo_alerta(self):
-        registro, _ = self.alertas.criar(self.propriedade_id, "Corte", 0, 0)
+        registro, _ = self.alertas.criar("Corte", *self.centro_da(self.propriedade_id))
         return registro
 
     def test_declaracoes_listadas_da_mais_nova_para_a_mais_antiga(self):

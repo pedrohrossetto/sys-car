@@ -24,7 +24,7 @@ class TestConformidade(BancoTemporario):
         self.unidade, _ = UnidadeController().criar("IBAMA", "Federal", "ibama@ex.gov")
 
     def novo_alerta(self, propriedade_id=None):
-        registro, _ = self.alertas.criar(propriedade_id or self.propriedade_id, "Corte", 0, 0)
+        registro, _ = self.alertas.criar("Corte", *self.centro_da(propriedade_id or self.propriedade_id))
         return registro
 
     def embargar(self, registro, propriedade_id=None):
@@ -183,19 +183,19 @@ class TestExclusoesECascade(BancoTemporario):
         unidades = UnidadeController()
         unidade, _ = unidades.criar("IBAMA")
         alertas = AlertaController()
-        registro, _ = alertas.criar(self.propriedade_id, "x", 0, 0)
+        registro, _ = alertas.criar("x", *self.centro_da(self.propriedade_id))
         alertas.mudar_status(registro.id, "CONFIRMADO")
         ConformidadeController().embargar(self.propriedade_id, unidade.id, registro.id, "m")
         self.assertEqual(unidades.excluir(unidade.id)[1],
                          "Esta unidade aplicou embargos e não pode ser excluída.")
         self.assertEqual(self.contar("unidades_competentes"), 1)
 
-    def test_apagar_propriedade_apaga_tudo_da_fiscalizacao(self):
+    def test_apagar_propriedade_apaga_embargos_e_declaracoes_e_desliga_alertas(self):
         unidade, _ = UnidadeController().criar("IBAMA")
         alertas = AlertaController()
         conformidade = ConformidadeController()
-        registro, _ = alertas.criar(self.propriedade_id, "x", 0, 0)
-        alertas.criar(self.propriedade_id, "y", 0, 0)
+        registro, _ = alertas.criar("x", *self.centro_da(self.propriedade_id))
+        alertas.criar("y", *self.centro_da(self.propriedade_id))
         alertas.mudar_status(registro.id, "CONFIRMADO")
         conformidade.embargar(self.propriedade_id, unidade.id, registro.id, "m")
         conformidade.solicitar_declaracao(self.propriedade_id)
@@ -205,9 +205,24 @@ class TestExclusoesECascade(BancoTemporario):
             conn.commit()
         finally:
             conn.close()
-        for tabela in ("registros_desmatamento", "notificacoes", "embargos", "declaracoes"):
+        for tabela in ("embargos", "declaracoes"):
             with self.subTest(tabela=tabela):
                 self.assertEqual(self.contar(tabela), 0)
+        # ADR-F14: o desmatamento aconteceu; o alerta fica no mapa, sem propriedade.
+        restantes = alertas.listar()
+        self.assertEqual(len(restantes), 2)
+        self.assertEqual({r.propriedade_id for r in restantes}, {None})
+        self.assertEqual(self.contar("notificacoes"), 3)
+
+    def test_alerta_sem_propriedade_nao_bloqueia_declaracao_nem_embarga(self):
+        unidade, _ = UnidadeController().criar("IBAMA")
+        alertas = AlertaController()
+        conformidade = ConformidadeController()
+        fora, _ = alertas.criar("Fora", -29.5, -50.0)
+        alertas.mudar_status(fora.id, "CONFIRMADO")
+        self.assertEqual(conformidade.solicitar_declaracao(self.propriedade_id)[0].resultado, "EMITIDA")
+        self.assertEqual(conformidade.embargar(self.propriedade_id, unidade.id, fora.id, "m")[1],
+                         "Embargo exige um alerta CONFIRMADO desta propriedade.")
 
 
 if __name__ == "__main__":

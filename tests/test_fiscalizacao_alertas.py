@@ -57,54 +57,75 @@ class TestAlertas(BancoTemporario):
         self.unidades = UnidadeController()
 
     def novo(self, **extra):
-        dados = dict(propriedade_id=self.propriedade_id, descricao="Corte raso",
-                     latitude="-28,2", longitude="-52.4")
+        """Alerta no centro da propriedade de teste (dentro da área dela)."""
+        lat, lon = self.centro_da(self.propriedade_id)
+        dados = dict(descricao="Corte raso", latitude=str(lat).replace(".", ","), longitude=lon)
         dados.update(extra)
         return self.alertas.criar(**dados)
 
-    def test_criar_alerta_pendente(self):
+    def test_ponto_dentro_da_area_define_a_propriedade(self):
         registro, erro = self.novo(data="2026-11-01")
         self.assertIsNone(erro)
         salvo = self.alertas.buscar_por_id(registro.id)
-        self.assertEqual((salvo.status, salvo.latitude, salvo.longitude, salvo.data),
-                         ("PENDENTE", -28.2, -52.4, "2026-11-01"))
+        lat, lon = self.centro_da(self.propriedade_id)
+        self.assertEqual((salvo.status, salvo.propriedade_id, salvo.data),
+                         ("PENDENTE", self.propriedade_id, "2026-11-01"))
+        self.assertAlmostEqual(salvo.latitude, lat)
+        self.assertAlmostEqual(salvo.longitude, lon)
+        self.assertEqual(self.alertas.descrever_local(salvo), "Sítio Teste")
+
+    def test_ponto_na_area_de_outra_propriedade(self):
+        outra = self.criar_propriedade("Outra")
+        registro, _ = self.novo(latitude=self.centro_da(outra)[0], longitude=self.centro_da(outra)[1])
+        self.assertEqual(registro.propriedade_id, outra)
+
+    def test_ponto_fora_de_toda_area_fica_sem_propriedade(self):
+        registro, erro = self.novo(latitude=-29.5, longitude=-50.0)
+        self.assertIsNone(erro)
+        salvo = self.alertas.buscar_por_id(registro.id)
+        self.assertIsNone(salvo.propriedade_id)
+        self.assertEqual(self.alertas.descrever_local(salvo), "fora de propriedade cadastrada")
+
+    def test_propriedade_no_ponto_para_a_tela(self):
+        lat, lon = self.centro_da(self.propriedade_id)
+        self.assertEqual(self.alertas.propriedade_no_ponto(lat, lon).id, self.propriedade_id)
+        self.assertIsNone(self.alertas.propriedade_no_ponto(-29.5, -50.0))
+        self.assertEqual([i for i, _, _ in self.alertas.listar_areas()], [self.propriedade_id])
 
     def test_validacoes_de_entrada(self):
         self.assertEqual(self.novo(latitude="91")[1], "Latitude deve estar entre -90 e 90.")
         self.assertEqual(self.novo(longitude="abc")[1], "Longitude deve ser um número.")
+        self.assertEqual(self.novo(latitude="")[1], "Latitude é obrigatória.")
         self.assertEqual(self.novo(descricao="  ")[1], "Preencha o campo Descrição.")
-        self.assertEqual(self.novo(propriedade_id=999)[1], "Propriedade não encontrada.")
-        self.assertEqual(self.novo(propriedade_id=None)[1], "Propriedade não encontrada.")
         self.assertEqual(self.novo(data="31/12/2026")[1], "Data deve estar no formato AAAA-MM-DD.")
         self.assertEqual(self.contar("registros_desmatamento"), 0)
 
-    def test_atualizar_muda_texto_data_e_coordenadas(self):
+    def test_atualizar_muda_descricao_e_data(self):
         registro, _ = self.novo()
-        _, erro = self.alertas.atualizar(registro.id, "Corte seletivo", "-29", "-53,5", "2026-10-30")
+        _, erro = self.alertas.atualizar(registro.id, "Corte seletivo", "2026-10-30")
         self.assertIsNone(erro)
         salvo = self.alertas.buscar_por_id(registro.id)
-        self.assertEqual((salvo.descricao, salvo.latitude, salvo.longitude, salvo.data),
-                         ("Corte seletivo", -29.0, -53.5, "2026-10-30"))
+        self.assertEqual((salvo.descricao, salvo.data), ("Corte seletivo", "2026-10-30"))
 
-    def test_atualizar_nao_muda_status_nem_propriedade(self):
+    def test_atualizar_nao_muda_ponto_status_nem_propriedade(self):
         registro, _ = self.novo()
         self.alertas.mudar_status(registro.id, "CONFIRMADO")
-        self.alertas.atualizar(registro.id, "Outra", 0, 0)
+        self.alertas.atualizar(registro.id, "Outra")
         salvo = self.alertas.buscar_por_id(registro.id)
-        self.assertEqual((salvo.status, salvo.propriedade_id), ("CONFIRMADO", self.propriedade_id))
+        self.assertEqual((salvo.status, salvo.propriedade_id, salvo.latitude, salvo.longitude),
+                         ("CONFIRMADO", self.propriedade_id, registro.latitude, registro.longitude))
 
     def test_atualizar_valida_e_nao_grava_com_erro(self):
         registro, _ = self.novo()
-        self.assertEqual(self.alertas.atualizar(registro.id, "x", "200", 0)[1],
-                         "Latitude deve estar entre -90 e 90.")
-        self.assertEqual(self.alertas.buscar_por_id(registro.id).latitude, -28.2)
-        self.assertEqual(self.alertas.atualizar(999, "x", 0, 0)[1], "Alerta não encontrado.")
-        self.assertEqual(self.alertas.atualizar(None, "x", 0, 0)[1], "Alerta não encontrado.")
+        self.assertEqual(self.alertas.atualizar(registro.id, " ")[1], "Preencha o campo Descrição.")
+        self.assertEqual(self.alertas.buscar_por_id(registro.id).descricao, "Corte raso")
+        self.assertEqual(self.alertas.atualizar(999, "x")[1], "Alerta não encontrado.")
+        self.assertEqual(self.alertas.atualizar(None, "x")[1], "Alerta não encontrado.")
 
     def test_atualizar_nao_gera_notificacao(self):
         self.unidades.criar("IBAMA")
         registro, _ = self.novo()
-        self.alertas.atualizar(registro.id, "Outra", 0, 0)
+        self.alertas.atualizar(registro.id, "Outra")
         self.assertEqual(self.contar("notificacoes"), 1)
 
     def test_excluir_apaga_em_cascata_notificacoes_e_embargos(self):
@@ -146,7 +167,7 @@ class TestAlertas(BancoTemporario):
         observador = ObservadorDeTeste()
         publicador.inscrever(observador)
         alertas = AlertaController(publicador)
-        registro, _ = alertas.criar(self.propriedade_id, "x", 0, 0)
+        registro, _ = alertas.criar("x", *self.centro_da(self.propriedade_id))
         alertas.mudar_status(registro.id, "CANCELADO")
         self.assertEqual(observador.eventos, [
             (registro.id, "novo alerta"), (registro.id, "status alterado para CANCELADO")])
@@ -199,7 +220,7 @@ class TestUnidades(BancoTemporario):
 
     def test_marcar_notificacao_lida(self):
         self.unidades.criar("IBAMA")
-        AlertaController().criar(self.propriedade_id, "x", 0, 0)
+        AlertaController().criar("x", *self.centro_da(self.propriedade_id))
         notificacao = self.unidades.listar_notificacoes()[0]
         self.assertEqual(notificacao.status, "ENVIADA")
         self.unidades.marcar_lida(notificacao.id)

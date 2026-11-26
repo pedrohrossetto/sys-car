@@ -31,7 +31,7 @@ class TestFichaDaPropriedade(BancoTemporario):
             "Sítio Boa Vista", self.dono.id, "RS-123", area_de_teste(9))
 
     def novo_alerta(self, propriedade_id=None):
-        registro, _ = self.alertas.criar(propriedade_id or self.prop.id, "Corte raso", -28.2, -52.4)
+        registro, _ = self.alertas.criar("Corte raso", *self.centro_da(propriedade_id or self.prop.id))
         return registro
 
     def test_propriedade_inexistente(self):
