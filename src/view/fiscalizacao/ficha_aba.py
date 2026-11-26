@@ -7,6 +7,7 @@ from view.fiscalizacao.componentes import (
     Seletor, ao_mostrar_aba, corrigir_cores_treeview, criar_tabela, mostrar_resultado,
     preencher_tabela,
 )
+from view.mapa import MapaCanvas
 from view.proprietario_aba import formatar_documento
 
 ORDEM = 90
@@ -67,8 +68,16 @@ class FichaAba:
             resumo, "Embargo ativo", ("Unidade", "Data", "Motivo"), 3)
 
     def _montar_tabelas(self):
-        tabelas = ttk.PanedWindow(self.frame, orient="vertical")
-        tabelas.pack(fill="both", expand=True, pady=6)
+        baixo = ttk.PanedWindow(self.frame, orient="horizontal")
+        baixo.pack(fill="both", expand=True, pady=6)
+        tabelas = ttk.PanedWindow(baixo, orient="vertical")
+        baixo.add(tabelas, weight=3)
+
+        # Mapa só de leitura: a área da propriedade em verde, as vizinhas em cinza e os alertas dela.
+        caixa_mapa = ttk.LabelFrame(baixo, text="Mapa", padding=4)
+        self.mapa = MapaCanvas(caixa_mapa, largura=380, altura=260)
+        self.mapa.pack(fill="both", expand=True)
+        baixo.add(caixa_mapa, weight=2)
 
         caixa_alertas = ttk.LabelFrame(tabelas, text="Alertas", padding=6)
         quadro, self.tabela_alertas = criar_tabela(
@@ -137,6 +146,10 @@ class FichaAba:
             (a.id, (a.data, a.status, a.descricao), a.status)
             for a in ficha.alertas
         ])
+        self.mapa.definir_areas(self.controller.listar_areas(), destaque_id=p.id)
+        self.mapa.definir_pontos([(a.latitude, a.longitude, a.status, f"#{a.id}") for a in ficha.alertas])
+        self.mapa.enquadrar(p.area.vertices if p.poligono else
+                            [(a.latitude, a.longitude) for a in ficha.alertas])
         preencher_tabela(self.tabela_declaracoes, [
             (d.id, (d.data, d.resultado, d.motivo or "-"), d.resultado)
             for d in ficha.declaracoes
@@ -155,6 +168,8 @@ class FichaAba:
         self.situacao.config(text="-", foreground="")
         preencher_tabela(self.tabela_alertas, [])
         preencher_tabela(self.tabela_declaracoes, [])
+        self.mapa.definir_areas(self.controller.listar_areas())
+        self.mapa.definir_pontos([])
 
 
 def registrar_abas(notebook):

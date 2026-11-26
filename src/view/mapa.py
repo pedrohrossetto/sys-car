@@ -129,7 +129,8 @@ class MapaCanvas(ttk.Frame):
         try:
             lat, lon = Poligono(area["pontos"]).centroide()
             x, y = self.projecao.para_pixel(lat, lon)
-            self.canvas.create_text(x, y, text=area["rotulo"], fill="#1b3a1d",
+            # Um pouco acima do centroide, para um alerta no centro não cobrir o nome.
+            self.canvas.create_text(x, y - 14, text=area["rotulo"], fill="#1b3a1d",
                                     font=("TkDefaultFont", 9, "bold"))
         except ValueError:
             pass
