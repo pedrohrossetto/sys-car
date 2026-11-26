@@ -24,15 +24,15 @@ Legenda: ✅ feito · 🟡 parcial · ❌ falta · ➖ não existe de propósito
 
 | Requisito | Status | Onde está |
 |---|---|---|
-| Decisões documentadas | ✅ | ADR-C01 a C04 (Cadastro) e ADR-F01 a F13 (Fiscalização) |
+| Decisões documentadas | ✅ | ADR-001 e ADR-002 (arquitetura e mapa), ADR-C01 a C05 (Cadastro) e ADR-F01 a F14 (Fiscalização) |
 | Implementação segue os padrões | ✅ | Template Method (`model/base.py`, `view/aba_crud.py`), Strategy (`model/documento.py`), Factory Method (`model/fiscalizacao/resultado_analise.py`), State (`model/fiscalizacao/status.py`), Observer (`model/fiscalizacao/observador.py`) |
 
 ### Interface gráfica
 
 | Requisito | Status | Onde está |
 |---|---|---|
-| Componentes básicos | ✅ | Notebook, Menu, Entry, Radiobutton, Combobox, Treeview, Scrollbar, Checkbutton, Listbox, Text, Toplevel, PanedWindow, caixas de mensagem e diálogo de salvar arquivo |
-| Eventos | ✅ | Enter, Esc, Delete, Ctrl+Q, duplo clique, botão direito, troca de aba, seleção de combobox, validação por tecla, saída de foco |
+| Componentes básicos | ✅ | Notebook, Menu, Entry, Radiobutton, Combobox, Treeview, Scrollbar, Checkbutton, Text, PanedWindow, **Canvas** (mapa, ADR-002), caixas de mensagem e diálogo de salvar arquivo |
+| Eventos | ✅ | Enter, Esc, Delete, Ctrl+Q, duplo clique, botão direito, troca de aba, seleção de combobox, validação por tecla; no mapa: clique, arrastar, roda do mouse, movimento do mouse e redimensionar |
 | Layouts | ✅ | `pack` e `grid` em todas as abas |
 
 ### Padrões de arquitetura
@@ -69,8 +69,7 @@ Legenda: ✅ feito · 🟡 parcial · ❌ falta · ➖ não existe de propósito
 | Entidade | Criar | Listar | Atualizar | Excluir | Tela |
 |---|---|---|---|---|---|
 | Proprietário | ✅ | ✅ | ✅ | ✅ | Proprietários |
-| Propriedade rural | ✅ | ✅ | ✅ | ✅ | Propriedades |
-| Localização | ✅ | ✅ | ✅ | ✅ | Localizações |
+| Propriedade rural (com a área no mapa, ADR-C05) | ✅ | ✅ | ✅ | ✅ | Propriedades |
 | Unidade competente | ✅ | ✅ | ✅ | ✅ | Unidades e Notificações |
 | Alerta de desmatamento | ✅ | ✅ | ✅ dados pelo formulário, status pelo State (ADR-F12) | ✅ em cascata (ADR-F12) | Alertas |
 | Notificação | ✅ automática | ✅ | ✅ "marcar como lida" | ➖ não existe (ADR-F13) | Unidades e Notificações |
@@ -93,7 +92,7 @@ O sistema tem uma só forma de acessar o banco, como pedem as aulas 09 e 10.
 1. ✅ **Unificar o acesso a dados:** os models da Fiscalização usam o `ModeloBase` (aulas 09 e 10, issue #3).
 2. ~~**Singleton:**~~ feito no `PublicadorAlertas` com `PublicadorAlertas.instancia()` (ADR-F08, aula 02).
 3. ✅ **Completar o CRUD** (aula 08, issue #5): CRUD do alerta (ADR-F12); motivo do embargo editável; operações que não existem de propósito em ADR-F13. Satélite, usuário e evidência saíram do sistema (ADR-F11).
-4. ✅ **Relacionamentos na tela:** a aba "Ficha da Propriedade" mostra dono, localização, alertas, embargo ativo e declarações (aula 11, issue #6).
+4. ✅ **Relacionamentos na tela:** a aba "Ficha da Propriedade" mostra dono, área (com mapa), alertas, embargo ativo e declarações (aula 11, issue #6).
 5. **Persistência (opcional):** exportação/importação em CSV ou backup do banco pelo menu Arquivo (aula 12).
 6. **Testes** para tudo o que for criado ou alterado.
 

@@ -1,6 +1,6 @@
 # Cadastro
 
-A área de Cadastro registra proprietários (pessoa física ou jurídica), propriedades rurais e a localização de cada propriedade.
+A área de Cadastro registra proprietários (pessoa física ou jurídica) e propriedades rurais, com a área de cada propriedade desenhada no mapa.
 
 ## Decisões de projeto
 
@@ -10,6 +10,7 @@ A área de Cadastro registra proprietários (pessoa física ou jurídica), propr
 | [ADR-C02](ADR-C02-strategy-validacao-documento.pt-br.md) | Strategy na validação de CPF e CNPJ | [EN](ADR-C02-strategy-validacao-documento.en.md) |
 | [ADR-C03](ADR-C03-remocao-modo-console.pt-br.md) | Remoção do modo console | [EN](ADR-C03-remocao-modo-console.en.md) |
 | [ADR-C04](ADR-C04-aba-crud-template-method.pt-br.md) | Template Method na `AbaCrud` | [EN](ADR-C04-aba-crud-template-method.en.md) |
+| [ADR-C05](ADR-C05-area-da-propriedade.pt-br.md) | Área da propriedade como polígono obrigatório (sai a Localização) | [EN](ADR-C05-area-da-propriedade.en.md) |
 
 ## Diagramas
 

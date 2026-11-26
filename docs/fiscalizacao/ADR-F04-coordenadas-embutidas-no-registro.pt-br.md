@@ -1,6 +1,6 @@
 # ADR-F04: Coordenadas embutidas no registro
 
-**Status:** aceita
+**Status:** substituída pela [ADR-F14](ADR-F14-ponto-do-alerta-define-a-propriedade.pt-br.md)
 
 ## Contexto
 

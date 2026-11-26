@@ -12,57 +12,55 @@ flowchart LR
         uc1(["Add a PF or PJ owner"])
         uc2(["Edit or delete an owner"])
         uc3(["Add a rural property"])
-        uc4(["Record the location and polygon"])
+        uc4(["Draw the area on the map"])
         uc5(["Validate CPF or CNPJ"])
-        uc6(["Validate coordinates"])
+        uc6(["Validate the area and the overlap"])
     end
     ator --> uc1
     ator --> uc2
     ator --> uc3
-    ator --> uc4
+    uc3 -. includes .-> uc4
     uc1 -. includes .-> uc5
     uc2 -. includes .-> uc5
     uc4 -. includes .-> uc6
 ```
 
-## Sequence: add a property with its location
+## Sequence: add a property with its area
 
 ```mermaid
 sequenceDiagram
     actor Operator
     participant PA as PropriedadeAba
+    participant EA as EditorArea
     participant PC as PropriedadeRuralController
-    participant LA as LocalizacaoAba
-    participant LC as LocalizacaoController
-    participant M as Models (ModeloBase)
+    participant G as Poligono
+    participant M as PropriedadeRural (ModeloBase)
     participant DB as SQLite
 
-    Operator->>PA: selects the owner and types the name
-    Operator->>PA: Salvar (Enter)
-    PA->>PC: criar(nome, proprietario_id, cadastro)
-    PC->>M: Proprietario.buscar_por_id(id)
-    M->>DB: SELECT
-    PC->>M: PropriedadeRural.salvar()
-    M->>DB: INSERT
-    PC-->>PA: (propriedade, None)
-    PA->>PA: recarregar()
-    Operator->>LA: selects the property and types the coordinates
-    Operator->>LA: Salvar (Enter)
-    LA->>LC: criar(propriedade_id, lat, lon, alt, poligono)
-    LC->>LC: converter_latitude/longitude/poligono
-    alt data is not valid
-        LC-->>LA: (None, "message")
-        LA-->>Operator: error dialog
-    else data is valid
-        LC->>M: Localizacao.salvar()
+    Operator->>PA: types the name and selects the owner
+    loop one click for each vertex
+        Operator->>EA: clicks on the map
+        EA->>G: Poligono(vertices) [shows area and centre]
+    end
+    Operator->>PA: Save (Enter)
+    PA->>PC: criar(nome, proprietario_id, cadastro, vertices)
+    PC->>G: Poligono(vertices)
+    PC->>M: listar_todos() [areas of the other properties]
+    PC->>G: sobrepoe(outra) for each area
+    alt area not valid or overlap
+        PC-->>PA: (None, "message")
+        PA-->>Operator: error box
+    else area valid
+        PC->>M: PropriedadeRural(..., poligono=text).salvar()
         M->>DB: INSERT
-        LC-->>LA: (localizacao, None)
+        PC-->>PA: (propriedade, None)
     end
 ```
 
 ## Implementation classes
 
 `ModeloBase` and `AbaCrud` are the Template Method points. `ValidadorDocumento` is the Strategy.
+`Poligono` is a value object: it has no table (ADR-C05). `MapaCanvas` and `Projecao` are in [ADR-002](../decisoes/ADR-002-mapa-em-canvas.en.md).
 
 ```mermaid
 classDiagram
@@ -75,6 +73,7 @@ classDiagram
         +deletar()
         +buscar_por_id(id)$
         +listar_todos()$
+        +colunas_no_banco()$
         #_valores()
         #_de_linha(linha)$
     }
@@ -91,14 +90,22 @@ classDiagram
         +nome
         +cadastro_publico
         +proprietario_id
+        +poligono
+        +area Poligono
+        +centroide
+        +area_ha
+        +contem(lat, lon)
+        +schema_desatualizado()$
     }
-    class Localizacao {
-        +latitude
-        +longitude
-        +altitude
-        +poligono_geometria
-        +propriedade_id
-        +buscar_por_propriedade(id)$
+    class Poligono {
+        <<value object>>
+        +vertices
+        +de_texto(texto)$
+        +para_texto()
+        +centroide()
+        +area_ha()
+        +contem(lat, lon)
+        +sobrepoe(outro)
     }
     class ValidadorDocumento {
         <<abstract>>
@@ -108,8 +115,11 @@ classDiagram
     class ValidadorCPF
     class ValidadorCNPJ
     class ProprietarioController
-    class PropriedadeRuralController
-    class LocalizacaoController
+    class PropriedadeRuralController {
+        +criar(nome, proprietario_id, cadastro, poligono)
+        +atualizar(id, ..., poligono)
+        +listar_areas(exceto_id)
+    }
     class AbaCrud {
         <<abstract>>
         +salvar()
@@ -121,35 +131,37 @@ classDiagram
     }
     class ProprietarioAba
     class PropriedadeAba
-    class LocalizacaoAba
+    class EditorArea
+    class MapaCanvas
+    class Projecao
 
     ModeloBase <|-- Proprietario
     ModeloBase <|-- PropriedadeRural
-    ModeloBase <|-- Localizacao
+    PropriedadeRural ..> Poligono : area
     ValidadorDocumento <|-- ValidadorCPF
     ValidadorDocumento <|-- ValidadorCNPJ
     ProprietarioController ..> ValidadorDocumento
     ProprietarioController ..> Proprietario
     PropriedadeRuralController ..> PropriedadeRural
-    LocalizacaoController ..> Localizacao
+    PropriedadeRuralController ..> Poligono : validates and tests overlap
     AbaCrud <|-- ProprietarioAba
     AbaCrud <|-- PropriedadeAba
-    AbaCrud <|-- LocalizacaoAba
     ProprietarioAba ..> ProprietarioController
     PropriedadeAba ..> PropriedadeRuralController
-    LocalizacaoAba ..> LocalizacaoController
+    PropriedadeAba *-- EditorArea
+    EditorArea *-- MapaCanvas
+    MapaCanvas *-- Projecao
     Proprietario "1" --> "0..*" PropriedadeRural
-    PropriedadeRural "1" *-- "0..1" Localizacao
 ```
 
 ## Data model
 
-When you delete an owner, the system also deletes the properties and their locations (`ON DELETE CASCADE`).
+When you delete an owner, the system also deletes the properties (`ON DELETE CASCADE`).
+The column `poligono` accepts NULL in the database, but the controller requires the area.
 
 ```mermaid
 erDiagram
     proprietarios ||--o{ propriedades_rurais : owns
-    propriedades_rurais ||--o| localizacoes : has
     proprietarios {
         INTEGER id PK
         TEXT nome
@@ -162,13 +174,6 @@ erDiagram
         TEXT nome
         TEXT cadastro_publico
         INTEGER proprietario_id FK
-    }
-    localizacoes {
-        INTEGER id PK
-        REAL latitude
-        REAL longitude
-        REAL altitude
-        TEXT poligono_geometria
-        INTEGER propriedade_id FK "UNIQUE"
+        TEXT poligono "lat,lon;lat,lon;..."
     }
 ```

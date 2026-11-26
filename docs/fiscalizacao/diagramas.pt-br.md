@@ -11,7 +11,7 @@ flowchart LR
     uni["«ator»<br/>Unidade competente"]
     pro["«ator»<br/>Proprietário"]
     subgraph sistema["SYS-CAR - Fiscalização"]
-        uc1(["Registrar alerta de desmatamento"])
+        uc1(["Marcar alerta no mapa"])
         uc2(["Editar ou excluir alerta"])
         uc3(["Notificar unidades"])
         uc4(["Examinar alerta: confirmar, cancelar, resolver"])
@@ -50,7 +50,7 @@ stateDiagram-v2
 
 Este diagrama mostra o caminho de um alerta:
 
-1. O fiscal registra o alerta.
+1. O fiscal clica no mapa. A propriedade é a que contém o ponto ([ADR-F14](ADR-F14-ponto-do-alerta-define-a-propriedade.pt-br.md)).
 2. O sistema notifica as unidades competentes.
 3. A unidade confirma o alerta.
 4. A unidade embarga a propriedade.
@@ -60,6 +60,7 @@ sequenceDiagram
     actor Fiscal
     participant AA as AlertasAba
     participant AC as AlertaController
+    participant PR as propriedades.py
     participant R as RegistroDesmatamento
     participant P as PublicadorAlertas
     participant N as NotificadorUnidades
@@ -67,9 +68,14 @@ sequenceDiagram
     participant CA as ConformidadeAba
     participant CC as ConformidadeController
 
-    Fiscal->>AA: preenche o formulário e clica em Salvar
-    AA->>AC: criar(propriedade_id, descricao, latitude, longitude, data)
-    AC->>R: RegistroDesmatamento(...).salvar()
+    Fiscal->>AA: clica no mapa
+    AA->>AC: propriedade_no_ponto(lat, lon)
+    AC-->>AA: "Sítio X" ou "fora de propriedade cadastrada"
+    Fiscal->>AA: escreve a descrição e clica em Salvar
+    AA->>AC: criar(descricao, latitude, longitude, data)
+    AC->>PR: propriedade_no_ponto(lat, lon) [Poligono.contem]
+    PR-->>AC: propriedade ou None
+    AC->>R: RegistroDesmatamento(propriedade_id ou None, ...).salvar()
     AC->>P: notificar(registro, "novo alerta")
     P->>N: atualizar(registro, evento) [Observer]
     N->>N: cria 1 Notificacao por unidade
@@ -93,10 +99,10 @@ sequenceDiagram
 
     Fiscal->>AA: duplo clique no alerta
     AA->>AC: buscar_por_id(id)
-    AC-->>AA: registro (a propriedade fica bloqueada no formulário)
+    AC-->>AA: registro (o clique no mapa fica desligado: ponto fixo)
     Fiscal->>AA: muda a descrição e clica em Salvar
-    AA->>AC: atualizar(id, descricao, latitude, longitude, data)
-    AC->>R: salvar() [status e propriedade não mudam]
+    AA->>AC: atualizar(id, descricao, data)
+    AC->>R: salvar() [ponto, propriedade e status não mudam]
     Fiscal->>AA: Excluir e confirma o aviso
     AA->>AC: excluir(id)
     AC->>R: deletar()
@@ -139,7 +145,7 @@ sequenceDiagram
 Este diagrama mostra onde está cada padrão de projeto:
 
 - `ModeloBase` aplica o Template Method: o SQL de INSERT, UPDATE, DELETE e SELECT fica só nele. Cada model declara `TABELA` e `COLUNAS`. Os 5 models da Fiscalização herdam dele, como os do Cadastro. Por isso o CRUD do alerta (`criar`, `atualizar`, `excluir`) está no `AlertaController`, que usa `salvar()` e `deletar()` do `ModeloBase`.
-- `PropriedadeRural`, `Proprietario` e `Localizacao` são do Cadastro. Aparecem aqui só para mostrar o contrato `propriedades.py`, que é o único ponto de acesso da Fiscalização ao Cadastro.
+- `PropriedadeRural`, `Proprietario` e `Poligono` são do Cadastro. Aparecem aqui só para mostrar o contrato `propriedades.py`, que é o único ponto de acesso da Fiscalização ao Cadastro. `propriedade_no_ponto()` usa `Poligono.contem()` para achar a propriedade do alerta (ADR-F14).
 - `ResultadoAnalise` aplica o Factory Method.
 - `EstadoAlerta` aplica o State.
 - `ObservadorAlerta` e `PublicadorAlertas` aplicam o Observer.
@@ -220,10 +226,11 @@ classDiagram
         +impedimentos
     }
     class AlertaController {
-        +criar(propriedade_id, descricao, latitude, longitude, data)
+        +criar(descricao, latitude, longitude, data)
         +buscar_por_id(id)
         +listar(incluir_finalizados)
-        +atualizar(id, descricao, latitude, longitude, data)
+        +atualizar(id, descricao, data)
+        +descrever_local(registro)
         +excluir(id)
         +mudar_status(id, novo_status)
         +transicoes_possiveis(id)
@@ -248,7 +255,6 @@ classDiagram
         <<dataclass>>
         +propriedade
         +proprietario
-        +localizacao
         +alertas
         +embargo_ativo
         +unidade_do_embargo
@@ -262,11 +268,18 @@ classDiagram
         +buscar_propriedade(id)
         +nomes_das_propriedades()
         +buscar_proprietario(proprietario_id)
-        +buscar_localizacao(propriedade_id)
+        +propriedade_no_ponto(lat, lon)
+        +listar_areas()
     }
-    class PropriedadeRural
+    class PropriedadeRural {
+        +area Poligono
+        +contem(lat, lon)
+    }
     class Proprietario
-    class Localizacao
+    class Poligono {
+        <<objeto de valor>>
+        +contem(lat, lon)
+    }
 
     ModeloBase <|-- UnidadeCompetente
     ModeloBase <|-- RegistroDesmatamento
@@ -275,7 +288,6 @@ classDiagram
     ModeloBase <|-- Declaracao
     ModeloBase <|-- PropriedadeRural
     ModeloBase <|-- Proprietario
-    ModeloBase <|-- Localizacao
     ResultadoAnalise <|-- SemPendencias
     ResultadoAnalise <|-- ComPendencias
     ResultadoAnalise ..> Declaracao : cria
@@ -307,18 +319,19 @@ classDiagram
     FichaPropriedade ..> EstadoAlerta : BLOQUEIA_CONFORMIDADE
     Propriedades ..> PropriedadeRural
     Propriedades ..> Proprietario
-    Propriedades ..> Localizacao
+    PropriedadeRural ..> Poligono : area
+    RegistroDesmatamento "0..*" --> "0..1" PropriedadeRural : o ponto cai na área
 ```
 
 ## Modelo de dados
 
-Apagar uma propriedade apaga os alertas, as notificações, os embargos e as declarações dela (`ON DELETE CASCADE`).
+Apagar uma propriedade apaga os embargos e as declarações dela (`ON DELETE CASCADE`). Os alertas dela ficam sem propriedade (`ON DELETE SET NULL`, ADR-F14).
 Apagar um alerta apaga as notificações e os embargos dele.
 Um índice único parcial garante no máximo um embargo ativo por propriedade.
 
 ```mermaid
 erDiagram
-    propriedades_rurais ||--o{ registros_desmatamento : "alertas"
+    propriedades_rurais |o--o{ registros_desmatamento : "contém o ponto"
     registros_desmatamento ||--o{ notificacoes : "gera"
     unidades_competentes ||--o{ notificacoes : "recebe"
     propriedades_rurais ||--o{ embargos : "sofre"
@@ -332,7 +345,7 @@ erDiagram
         TEXT status
         REAL latitude
         REAL longitude
-        INTEGER propriedade_id FK
+        INTEGER propriedade_id FK "NULL = fora de propriedade"
     }
     embargos {
         INTEGER id PK

@@ -5,11 +5,12 @@ Cada passo tem uma ação.
 
 ## O que é o Cadastro
 
-O Cadastro guarda 3 coisas:
+O Cadastro guarda 2 coisas:
 
 - o **proprietário**: a pessoa ou a empresa dona da terra;
-- a **propriedade**: a terra, por exemplo um sítio ou uma fazenda;
-- a **localização**: o lugar da propriedade no mapa.
+- a **propriedade**: a terra, por exemplo um sítio ou uma fazenda.
+
+Toda propriedade tem uma **área**: a borda da terra, desenhada no mapa.
 
 ## Antes de começar
 
@@ -40,23 +41,27 @@ Corrija e salve de novo.
 1. Clique na aba **Propriedades**.
 2. Escreva o nome da propriedade.
 3. Escolha o proprietário na lista.
-4. Aperte **Enter** ou clique em **Salvar**.
+4. Desenhe a área no mapa (veja abaixo).
+5. Aperte **Enter** ou clique em **Salvar**.
 
-## Cadastrar a localização
+## Desenhar a área no mapa
 
-![Tela da aba Localizações](../imagens/aba-localizacoes.png)
+1. Clique no mapa num canto da terra.
+2. Clique no próximo canto. Siga a borda da terra.
+3. Use 3 cantos ou mais.
+4. Embaixo do mapa aparecem o tamanho da área e o centro.
+5. Errou o último canto? Clique em **Desfazer vértice**.
+6. Quer começar de novo? Clique em **Limpar área**.
 
-1. Clique na aba **Localizações**.
-2. Escolha a propriedade na lista.
-3. Escreva a latitude. Exemplo: -28,26
-4. Escreva a longitude. Exemplo: -52,40
-5. A altitude é opcional.
-6. O polígono é opcional. Ele marca a borda da terra.
-7. Escreva o polígono assim: lat,lon; lat,lon; lat,lon
-8. Use 3 pontos ou mais.
-9. Aperte **Enter** ou clique em **Salvar**.
+Para mexer no mapa:
 
-Cada propriedade tem só 1 localização.
+- gire a **roda do mouse** para aproximar ou afastar;
+- **arraste** o mapa para mudar o lugar;
+- clique em **Enquadrar tudo** para ver todas as áreas.
+
+As outras propriedades aparecem em cinza.
+Uma área não pode entrar na área de outra propriedade.
+As áreas podem encostar uma na outra.
 
 ## Mudar um cadastro
 
@@ -72,6 +77,7 @@ Cada propriedade tem só 1 localização.
 3. Confirme.
 
 Cuidado: apagar um proprietário apaga as propriedades dele.
+Os alertas dessas propriedades ficam no mapa, sem propriedade.
 
 ## Limpar o formulário
 
