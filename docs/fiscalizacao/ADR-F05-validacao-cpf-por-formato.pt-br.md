@@ -1,6 +1,6 @@
 # ADR-F05: CPF do usuário validado só pelo formato
 
-**Status:** aceita
+**Status:** substituída pela [ADR-F11](ADR-F11-remocao-das-fontes-e-factory-na-declaracao.pt-br.md)
 
 ## Contexto
 

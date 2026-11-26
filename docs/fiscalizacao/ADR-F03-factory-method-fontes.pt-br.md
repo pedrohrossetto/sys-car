@@ -1,6 +1,6 @@
 # ADR-F03: Factory Method nas fontes de detecção
 
-**Status:** aceita
+**Status:** substituída pela [ADR-F11](ADR-F11-remocao-das-fontes-e-factory-na-declaracao.pt-br.md)
 
 ## Contexto
 

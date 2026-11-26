@@ -24,8 +24,8 @@ Legenda: ✅ feito · 🟡 parcial · ❌ falta.
 
 | Requisito | Status | Onde está |
 |---|---|---|
-| Decisões documentadas | ✅ | ADR-C01 a C04 (Cadastro) e ADR-F01 a F08 (Fiscalização) |
-| Implementação segue os padrões | ✅ | Template Method (`model/base.py`, `view/aba_crud.py`), Strategy (`model/documento.py`), Factory Method (`model/fiscalizacao/fonte.py`), State (`model/fiscalizacao/status.py`), Observer (`model/fiscalizacao/observador.py`) |
+| Decisões documentadas | ✅ | ADR-C01 a C04 (Cadastro) e ADR-F01 a F12 (Fiscalização) |
+| Implementação segue os padrões | ✅ | Template Method (`model/base.py`, `view/aba_crud.py`), Strategy (`model/documento.py`), Factory Method (`model/fiscalizacao/resultado_analise.py`), State (`model/fiscalizacao/status.py`), Observer (`model/fiscalizacao/observador.py`) |
 
 ### Interface gráfica
 
@@ -55,7 +55,7 @@ Legenda: ✅ feito · 🟡 parcial · ❌ falta.
 
 | Aula | Data | Conteúdo | Status | Situação |
 |---|---|---|---|---|
-| 02 | 21/08 | Padrões criacionais: Factory e **Singleton** | ✅ | Factory Method nas fontes (ADR-F03) e Singleton no `PublicadorAlertas` (ADR-F08) |
+| 02 | 21/08 | Padrões criacionais: Factory e **Singleton** | ✅ | Factory Method na criação da declaração (ADR-F11, substitui a ADR-F03) e Singleton no `PublicadorAlertas` (ADR-F08) |
 | 07 | 09/10 | GUI + SGBD: criar e ler | ✅ | Todas as abas criam e listam registros no SQLite |
 | 08 | 16/10 | GUI + SGBD: atualizar e remover | 🟡 | Ver tabela de CRUD abaixo |
 | 09 | 23/10 | Unificar o acesso a dados com a GUI (MVC): adicionar, listar | ✅ | Todos os models herdam do `ModeloBase` (issue #3, ADR-F09) |
@@ -71,11 +71,8 @@ Legenda: ✅ feito · 🟡 parcial · ❌ falta.
 | Proprietário | ✅ | ✅ | ✅ | ✅ | Proprietários |
 | Propriedade rural | ✅ | ✅ | ✅ | ✅ | Propriedades |
 | Localização | ✅ | ✅ | ✅ | ✅ | Localizações |
-| Satélite | ✅ | ✅ | ✅ | ✅ | Fontes |
-| Usuário denunciante | ✅ | ✅ | ✅ | ✅ | Fontes |
 | Unidade competente | ✅ | ✅ | ✅ | ✅ | Unidades e Notificações |
-| Alerta de desmatamento | ✅ | ✅ | 🟡 só o status | ❌ | Alertas |
-| Evidência | ✅ | ✅ | ❌ | ❌ | Alertas |
+| Alerta de desmatamento | ✅ | ✅ | ✅ dados pelo formulário, status pelo State (ADR-F12) | ✅ em cascata (ADR-F12) | Alertas |
 | Notificação | ✅ automática | ✅ | 🟡 só "marcar como lida" | ❌ | Unidades e Notificações |
 | Embargo | ✅ | ✅ | 🟡 só "levantar embargo" | ❌ | Embargos e Declarações |
 | Declaração | ✅ | ✅ | ❌ | ❌ | Embargos e Declarações |
@@ -95,7 +92,7 @@ O sistema tem uma só forma de acessar o banco, como pedem as aulas 09 e 10.
 
 1. ✅ **Unificar o acesso a dados:** os models da Fiscalização usam o `ModeloBase` (aulas 09 e 10, issue #3).
 2. ~~**Singleton:**~~ feito no `PublicadorAlertas` com `PublicadorAlertas.instancia()` (ADR-F08, aula 02).
-3. **Completar o CRUD** de alertas, evidências, embargos, declarações e notificações, ou documentar por que uma operação não existe (aula 08).
+3. **Completar o CRUD** de embargos, declarações e notificações, ou documentar por que uma operação não existe (aula 08). O CRUD do alerta está pronto (ADR-F12). Satélite, usuário e evidência saíram do sistema (ADR-F11).
 4. ✅ **Relacionamentos na tela:** a aba "Ficha da Propriedade" mostra dono, localização, alertas, embargo ativo e declarações (aula 11, issue #6).
 5. **Persistência (opcional):** exportação/importação em CSV ou backup do banco pelo menu Arquivo (aula 12).
 6. **Testes** para tudo o que for criado ou alterado.
