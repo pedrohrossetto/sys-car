@@ -9,6 +9,7 @@
 | [Exceções](decisoes/ADR-003-estrategia-de-excecoes.pt-br.md) ([EN](decisoes/ADR-003-estrategia-de-excecoes.en.md)) | Onde a exceção nasce, onde é capturada e como chega à tela |
 | [Cadastro](cadastro/README.md) | Proprietários e propriedades (com a área no mapa) |
 | [Fiscalização](fiscalizacao/README.md) | Alertas, notificações, embargos e declarações |
+| [Apresentação](apresentacao/roteiro.md) | Roteiro da demonstração final, com os dados de exemplo |
 | [Status do trabalho](status-do-trabalho.md) | O que já foi feito e o que falta para a entrega final |
 
 ## Idiomas

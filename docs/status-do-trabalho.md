@@ -95,7 +95,7 @@ O sistema tem uma só forma de acessar o banco, como pedem as aulas 09 e 10.
 3. ✅ **Completar o CRUD** (aula 08, issue #5): CRUD do alerta (ADR-F12); motivo do embargo editável; operações que não existem de propósito em ADR-F13. Satélite, usuário e evidência saíram do sistema (ADR-F11).
 4. ✅ **Relacionamentos na tela:** a aba "Ficha da Propriedade" mostra dono, área (com mapa), alertas, embargo ativo e declarações (aula 11, issue #6).
 5. **Persistência (opcional):** exportação/importação em CSV ou backup do banco pelo menu Arquivo (aula 12, issue #7). A aula 12 já está coberta pelo SQLite.
-6. ✅ **Testes** para tudo o que foi criado ou alterado: 186 testes automatizados.
+6. ✅ **Testes** para tudo o que foi criado ou alterado: 189 testes automatizados.
 
 ### Documentação
 
@@ -112,7 +112,7 @@ O sistema tem uma só forma de acessar o banco, como pedem as aulas 09 e 10.
 
 ### Apresentação
 
-14. Roteiro de demonstração (do cadastro até a declaração) e ensaio antes de 27/11.
+14. ✅ Roteiro de demonstração (do cadastro até a ficha) e dados de exemplo: `docs/apresentacao/roteiro.md` e `src/dados_exemplo.py` (issue #11). **Falta:** o ensaio com o grupo em 26/11.
 
 ## 4. Calendário
 
