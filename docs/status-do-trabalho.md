@@ -16,7 +16,7 @@ Legenda: ✅ feito · 🟡 parcial · ❌ falta · ➖ não existe de propósito
 |---|---|---|
 | Texto sobre classes, interações e interfaces | ✅ | ADRs em `docs/decisoes/`, `docs/cadastro/` e `docs/fiscalizacao/` |
 | Diagramas UML | ✅ | `docs/cadastro/diagramas.pt-br.md` e `docs/fiscalizacao/diagramas.pt-br.md` (casos de uso, sequência, classes, dados); diagrama de pacotes no ADR-001 |
-| Imagens | ✅ | Capturas em `docs/imagens/`: Proprietários, Propriedades, Alertas e Ficha da Propriedade (as três últimas com o mapa), no README e nos guias |
+| Imagens | ✅ | Capturas de todas as abas em `docs/imagens/`: Proprietários, Propriedades, Alertas, Unidades e Notificações, Embargos e Declarações e Ficha da Propriedade. Elas aparecem no README e nos guias |
 | Português técnico controlado (estilo ASD-STE100) | 🟡 | Cadastro e ADR-001 seguem o padrão. **Falta:** revisar a documentação da Fiscalização (`docs/fiscalizacao/`) no mesmo padrão. As versões em inglês (`*.en.md`) do Cadastro são um extra; o requisito não pede inglês |
 | Leitura fácil | ✅ | `docs/cadastro/guia-leitura-facil.md` e `docs/fiscalizacao/guia-leitura-facil.md` |
 
